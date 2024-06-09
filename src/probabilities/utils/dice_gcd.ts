@@ -1,3 +1,4 @@
+// Build based on article here: https://en.wikipedia.org/wiki/Binary_GCD_algorithm
 function makeOdd(input: number): number {
   let output = input;
   while (!(output & 1)) {
