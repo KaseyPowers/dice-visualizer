@@ -1,3 +1,5 @@
+import { DataEntryType } from "../types/types";
+
 // Build based on article here: https://en.wikipedia.org/wiki/Binary_GCD_algorithm
 function makeOdd(input: number): number {
   let output = input;
@@ -16,8 +18,8 @@ function binary_gcd(first: number, second: number): number {
   // while both are even, count shared divisions
   while (!(a & 1) && !(b & 1)) {
     commonD++;
-    a >>= 1;
-    b >>= 1;
+    a >>>= 1;
+    b >>>= 1;
   }
   // at least one could still be even, so check both
   a = makeOdd(a);
@@ -44,24 +46,27 @@ function binary_gcd(first: number, second: number): number {
   return a << commonD;
 }
 
-function validateGCDInput(input: number[]) {
+/** Working with entry array directly to hopefully aid efficiency */
+export function dice_entry_gcd(input: DataEntryType[]): number {
   if (input.length <= 1) {
-    throw new Error("Expected at least 2 numbers for dice gcd");
+    throw new Error("Expected at least 2 inputs in order to get a gcd value");
   }
-  if (input.some((val) => val < 1)) {
-    throw new Error("Expected every count to be at least 1");
-  }
-}
-// making sure to specify that this is for dice and so we can do some validation and other steps to simplify
-export function dice_gcd(input: number[]): number {
-  validateGCDInput(input);
-  // sort the input values for simplicity
-  const counts = input.toSorted((a, b) => a - b);
-  // the gcd(a, a) = a so just assign first count as starting output;
-  let output = counts[0];
-  // exit out of loop as soon as output is 1
-  for (let i = 1; i < counts.length && output !== 1; i += 1) {
-    output = binary_gcd(output, counts[i]);
+  let output = input[0][1];
+  // Trying using a while loop, as it can be more effient as a way to iterate through the array
+  let index = 1;
+  while (output !== 1 && index < input.length) {
+    const count = input[index][1];
+    if (count < 1) {
+      throw new Error("Expected every count to be greater than or equal to 1");
+    }
+    output = binary_gcd(output, count);
+    index++;
   }
   return output;
+}
+
+// This assumes we have a final set of entries, and will make sure we use the smallest counts possible while retaining the probabilities of each
+export function minimizeEntryCounts(input: DataEntryType[]): DataEntryType[] {
+  const gcd = dice_entry_gcd(input);
+  return gcd > 1 ? input.map(([val, count]) => [val, count / gcd]) : input;
 }

@@ -1,5 +1,5 @@
 import { type DataVariable, DataItem, DataCollection } from "./data_item";
-import { isDataVariable } from "./utils/type_checks";
+import { isDataVariable } from "./types/type_checks";
 
 export type DataTypeKeys = "collection" | "dice" | "var";
 

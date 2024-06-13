@@ -13,3 +13,8 @@ export type DataEntryType = EntryType<DataVariableType>;
 
 // technically the same as an entry right now, but useful in case we change the variable type
 export type DataRangeType = { min: DataVariableType; max: DataVariableType };
+
+export type DataItemDataTypes =
+  | DataRangeType
+  | Array<DataVariableType>
+  | Array<DataEntryType>;

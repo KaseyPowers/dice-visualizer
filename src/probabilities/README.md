@@ -1,3 +1,7 @@
+# Resources
+
+- [benchmarkjs](https://benchmarkjs.com/)
+
 # Starting Point
 
 From what I can tell, the easiest way to handle the output probabilities is to treat it as an array/collectiong/etc. of each potential output, with each value having a 1/total% chance.
