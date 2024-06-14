@@ -14,17 +14,31 @@ adding arrays: `[1, 2, 3, 4] + [1, 2] = [ [2, 3, 4, 5], [3, 4, 5, 6] ] = [2, 3, 
 
 ## Data Types
 
-- Data Variable: staring point for the rest, starting with `number`
-- Data Array: `number[]` ordered list
-- Data Set: `Map<number, number>` for unordered sets of data
-- Data Collection: Array of the any of the above values
+### Outer Types
+
+the types used by functions and the like:
+
+- Data Variable: staring point for the rest, starting with `number`, but maybe will try allowing for strings and such later?
+- Data Item: A single set of probabilities, interchangable with the term `dice` for this.
+- Data Collection: More than one item. used to store arrays of values, also used for things like `4d4` = a collection of `4` DataItems(`d4`)
+
+### Inner Types
+
+How data is stored internally to try keeping everything as simple as posible during computation
+
+- Entry: a tuple of `[value, count]`, the default structure that most of the data is built from.
+- Inside Data Items:
+  - Entry array: The default type, a collection of variables and the count of that variable
+  - Variable Array: an array of variables, shorthand for for an entry array with each having a count of 1
+  - Variable Range: stored as `{min: variable, max: variable}`, this is a shorthand for a variable array of values from min to max (inclusive)
 
 ## Data Conversions
 
 when running any logic, need to define the rules for how they will behave
 
-- Data Variable: use as is, if expecting any of the other values, they are an array/map with only one value
-- Data Array: if
+- Data Variable: can only cast up, as a "dice", will be a dice that only roles one value. As a collection, will be an array with that one value.
+- Data Item: Simple convert to collection (array of 1), when used for variable, call function for each value in that dice and combine the results into a dice again.
+- Data Collection: If either other type used, combine it to a single value (could be a variable or item depending on collection), then convert that type to whatever is needed.
 
 # Examples
 
@@ -68,3 +82,11 @@ Explode d4:
   - `{ 2: 1, 3: 2, 4: 3, 5: 4, ({3: 1, 4: 2, 5: 3, 6: 4}): 10}`
   - `{ 2: 10, 3: 20, 4: 30, 5: 40, 3: 10, 4: 20, 5: 30, 6: 40}`
   - `{ 2: 10, 3: 30, 4: 50, 5: 70, 6: 40}` -> `{2: 1, 3: 3, 4: 5, 5: 7, 6: 4}`
+
+# String Parsing
+
+Strings will help with defining the original dice? TBD
+
+If we do go that route, some notes for the regex here:
+
+- `(\d(?=d))` has a positive lookahead to confirm the `d` character without consuming it, to help with catching `4d4` vs `d4`

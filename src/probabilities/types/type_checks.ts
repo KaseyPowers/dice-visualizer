@@ -1,4 +1,10 @@
-import type { DataVariableType, DataEntryType, DataRangeType } from "./types";
+import { TypeCheckFn } from "@/utils/types";
+import type {
+  DataVariableType,
+  DataEntryType,
+  DataRangeType,
+  EntryType,
+} from "./types";
 
 /** Simple Type checks */
 export function isDataVariableType(input: unknown): input is DataVariableType {
@@ -16,14 +22,21 @@ export function isDataRangeType(input: unknown): input is DataRangeType {
   );
 }
 
-export function isDataEntryType(input: unknown): input is DataEntryType {
+export function isEntryType<T = unknown>(
+  input: unknown,
+  fn: TypeCheckFn<T>
+): input is EntryType<T> {
   return (
     !!input &&
     Array.isArray(input) &&
     input.length === 2 &&
-    isDataVariableType(input[0]) &&
-    typeof input[1] === "number"
+    typeof input[1] === "number" &&
+    fn(input[0])
   );
+}
+
+export function isDataEntryType(input: unknown): input is DataEntryType {
+  return isEntryType(input, isDataVariableArr);
 }
 
 export function isDataVariableArr(
@@ -32,13 +45,20 @@ export function isDataVariableArr(
   return Array.isArray(input) && input.every((val) => isDataVariableType(val));
 }
 
+export function isEntryArr<T = unknown>(
+  input: unknown,
+  fn: TypeCheckFn<T>
+): input is Array<EntryType<T>> {
+  return Array.isArray(input) && input.every((val) => isEntryType(val, fn));
+}
+
 export function isDataEntryArr(input: unknown): input is Array<DataEntryType> {
   return Array.isArray(input) && input.every((val) => isDataEntryType(val));
 }
 
 /** Validate Known Types */
-export function dataEntryIsValid(
-  input: DataEntryType,
+export function entryIsValid(
+  input: EntryType<unknown>,
   assert = false
 ): boolean {
   if (input[1] < 1) {
@@ -73,9 +93,29 @@ export function dataVariableArrIsValid(
     }
     return false;
   }
-  if (input.length !== new Set(input).size) {
+  // skip this check if length is 1, since the set will always have the same size
+  if (input.length > 1 && input.length !== new Set(input).size) {
     if (assert) {
       throw new Error("Expected the array to have unique values");
+    }
+    return false;
+  }
+  return true;
+}
+
+export function entryArrIsValid(
+  input: Array<EntryType<unknown>>,
+  assert = false
+): boolean {
+  if (input.length <= 0) {
+    if (assert) {
+      throw new Error("Empty array is not valid");
+    }
+    return false;
+  }
+  if (input.some((entry) => !entryIsValid(entry))) {
+    if (assert) {
+      throw new Error("Expected every entry to be valid");
     }
     return false;
   }
@@ -86,16 +126,8 @@ export function dataEntryArrIsValid(
   input: Array<DataEntryType>,
   assert = false
 ): boolean {
-  if (input.length <= 0) {
-    if (assert) {
-      throw new AssertionError({ message: "Empty array is not valid" });
-    }
-    return false;
-  }
-  if (input.some((entry) => !dataEntryIsValid(entry))) {
-    if (assert) {
-      throw new AssertionError({ message: "Expected every entry to be valid" });
-    }
+  // fn handles assert part of logic, return
+  if (!entryArrIsValid(input, assert)) {
     return false;
   }
   if (input.length !== new Set(input.map((val) => val[0])).size) {
@@ -113,7 +145,7 @@ export function isValidDataEntryType(
   input: unknown,
   assert = false
 ): input is DataEntryType {
-  return isDataEntryType(input) && dataEntryIsValid(input, assert);
+  return isDataEntryType(input) && entryIsValid(input, assert);
 }
 export function isValidDataRangeType(
   input: unknown,
@@ -127,6 +159,15 @@ export function isValidDataVariableArr(
 ): input is Array<DataVariableType> {
   return isDataVariableArr(input) && dataVariableArrIsValid(input, assert);
 }
+
+export function isValidEntryArr<T = unknown>(
+  input: unknown,
+  fn: TypeCheckFn<T>,
+  assert = false
+): input is Array<EntryType<T>> {
+  return isEntryArr(input, fn) && entryArrIsValid(input, assert);
+}
+
 export function isValidDataEntryArr(
   input: unknown,
   assert = false
@@ -135,6 +176,13 @@ export function isValidDataEntryArr(
 }
 
 /** Assert Types */
+export function assertDataVariableType(
+  input: unknown
+): asserts input is DataVariableType {
+  if (!isDataVariableArr(input)) {
+    throw new Error("Expected a DataVariableType");
+  }
+}
 export function assertDataEntryType(
   input: unknown,
   assertValid = false
@@ -169,6 +217,18 @@ export function assertDataVariableArr(
     throw new Error(
       `Expected a ${assertValid ? "valid " : ""}DataVariableArray`
     );
+  }
+}
+
+export function assertEntryArr<T = unknown>(
+  input: unknown,
+  fn: TypeCheckFn<T>,
+  assertValid = false
+): asserts input is Array<EntryType<T>> {
+  if (
+    !(assertValid ? isValidEntryArr(input, fn, true) : isEntryArr(input, fn))
+  ) {
+    throw new Error(`Expected a ${assertValid ? "valid " : ""}EntryArray`);
   }
 }
 

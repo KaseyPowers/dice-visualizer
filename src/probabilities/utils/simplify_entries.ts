@@ -1,12 +1,11 @@
 import type { DataVariableType, DataEntryType, DataRangeType } from "../types";
 import { dataRangeTotal } from "../types";
 
-import { minimizeEntryCounts, toUniqueVars } from "../utils";
-
-// parse a set of entries into it's most simple data types
-export function simplifyEntries(input: Array<DataEntryType>) {
-  // make sure they are unique
-  const values = toUniqueVars(input);
+import { toUniqueVarEntries } from "./unique_vars";
+import { minimizeEntryCounts } from "./dice_gcd";
+// use when we know the values are unique already.
+export function simplifyUniqueEntries(values: DataEntryType[]) {
+  // if single value, return it
   if (values.length === 1) {
     return values[0][0];
   }
@@ -43,4 +42,11 @@ export function simplifyEntries(input: Array<DataEntryType>) {
   }
   // do the minimized count logic only on entries
   return minimizeEntryCounts(values);
+}
+
+// take inputs, and make sure they are unique before simplifying
+export function simplifyEntries(
+  input: Array<DataVariableType | DataEntryType>
+) {
+  return simplifyUniqueEntries(toUniqueVarEntries(input));
 }

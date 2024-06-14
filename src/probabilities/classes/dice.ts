@@ -1,44 +1,38 @@
 import { GetterFn } from "@/utils/types";
 import { getOnce } from "@/utils/getter_helpers";
+
+import type { DataVariableType, DataRangeType, DataEntryType } from "../types";
+
 import {
+  dataRangeTotal,
   assertDataEntryArr,
   assertDataRangeType,
   assertDataVariableArr,
   isValidDataEntryArr,
   isValidDataRangeType,
   isValidDataVariableArr,
-} from "./types/type_checks";
-import type {
-  DataVariableType,
-  DataRangeType,
-  DataEntryType,
-  DataItemDataTypes,
-} from "./types";
-import { dataRangeTotal } from "./types";
-import { toUniqueEntryVars } from "./utils/utilities";
-import { minimizeEntryCounts } from "./utils/dice_gcd";
-// const isDataVariable = (input: unknown): input is DataVariable => (typeof input === "number");
-/**
- * Thoughts/Questions:
- * - Should entries/values always return in a certain order (for quick access to largest/smallest etc.)- to copy AnyDice
- *  - if we do, how would we do this for a collection when the order of dice could fluctuate more?
- *      - maybe only on collections of the same type (ex. 4d4 type, or DataVariable[])
- */
+} from "../types";
 
-export class DataItem {
-  private readonly data: DataItemDataTypes;
+export type DiceInnerDataTypes =
+  | DataRangeType
+  | Array<DataVariableType>
+  | Array<DataEntryType>;
+
+export class Dice {
+  private readonly data: DiceInnerDataTypes;
   readonly type: "range" | "array" | "dice";
-
-  //   static parse()
-
-  private constructor(input: DataItemDataTypes | DataItem) {
-    if (input instanceof DataItem) {
+  static assertDice(input: unknown): asserts input is Dice {
+    if (!(input instanceof Dice)) {
+      throw new Error("Asserted value was a Dice instance");
+    }
+  }
+  constructor(input: DiceInnerDataTypes | Dice) {
+    if (input instanceof Dice) {
       this.data = input.data;
     } else {
       this.data = input;
     }
     // get type again, to verify that it's valid and correct to input class if needed.
-
     if (isValidDataRangeType(this.data, true)) {
       this.type = "range";
     } else if (isValidDataVariableArr(this.data, true)) {
@@ -50,7 +44,8 @@ export class DataItem {
         "Invalid data type, expected a range, or an array with variables or entries"
       );
     }
-    if (input instanceof DataItem) {
+
+    if (input instanceof Dice) {
       if (this.type !== input.type) {
         throw new Error(
           `Copying input instance, it had type ${input.type} but checking data got ${this.type}`
@@ -63,27 +58,31 @@ export class DataItem {
       return;
     }
 
+    let getTotalCount: typeof this._getTotalCount;
+    let getEntries: typeof this._getEntries;
+    let getValues: typeof this._getValues;
+
     // Type and getters are defined every time to make sure they are correct
     // NOTE: getters should run once (even in copies, so worth doing the assertions to verify)
     if (this.type === "dice") {
-      this._getTotalCount = () => this.entries.length;
-      this._getEntries = () => {
+      getTotalCount = () => this.entries.length;
+      getEntries = () => {
         assertDataEntryArr(this.data, true);
         return this.data;
       };
-      this._getValues = () => {
+      getValues = () => {
         return this.entries.map((val) => val[0]);
       };
     } else {
-      this._getEntries = () => {
+      getEntries = () => {
         return this.values.map((val) => [val, 1]);
       };
       if (this.type === "range") {
-        this._getTotalCount = () => {
+        getTotalCount = () => {
           assertDataRangeType(this.data, true);
           return dataRangeTotal(this.data as DataRangeType);
         };
-        this._getValues = () => {
+        getValues = () => {
           assertDataRangeType(this.data, true);
           const { min, max } = this.data;
           let output: Array<DataVariableType> = [];
@@ -93,14 +92,18 @@ export class DataItem {
           return output;
         };
       } else {
-        this._getTotalCount = () => this.values.length;
-        this._getValues = () => {
+        getTotalCount = () => this.values.length;
+        getValues = () => {
           assertDataVariableArr(this.data, true);
           // Insert sorting here if needed
           return this.data;
         };
       }
     }
+    // wrap each with a getOnce
+    this._getTotalCount = getOnce(getTotalCount);
+    this._getEntries = getOnce(getEntries);
+    this._getValues = getOnce(getValues);
   }
 
   private _getTotalCount: GetterFn<number>;
