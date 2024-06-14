@@ -10,6 +10,7 @@ import type {
 } from "../classes";
 import { DataItem, Dice, assertValueForTag } from "../classes";
 import { flattenDataItemEntries } from "./flatten_entries";
+import { parseSingleDataItem } from "./parse";
 
 /**
  * Notes:
@@ -77,23 +78,20 @@ type ParamsAsItems<Params extends Array<DataItemType>> = {
  * - iterate through inputs, and built out an array of input params in one go.
  */
 
-function fromOutput(output: EntryType<DataItemType>[]): DataItemType {
-  if (output.length < 1) {
+function fromOutput(outputs: EntryType<DataItemType>[]) {
+  if (outputs.length < 1) {
     throw new Error("No outputs?");
   }
-  // only one output, so inputs matched outputs
-  if (output.length === 1) {
-    // return the result from the one value
-    return output[0][0];
+  if (outputs.length === 1) {
+    return DataItem.newItem(outputs[0][0]);
   }
-
-  return new Dice(flattenDataItemEntries(output));
+  return parseSingleDataItem(outputs);
 }
 
 type InnerWrapFn = (
   fn: InputFnDef,
   getTarget: (index: number) => DataTagType
-) => (...items: DataItem[]) => DataItemType;
+) => (...items: DataItem[]) => DataItem;
 
 // Wrote out both functions. I'm sure there will be situations where one is better than the other. Can sort that out later.
 const wrapRecursive: InnerWrapFn = (fn, getTarget) => {

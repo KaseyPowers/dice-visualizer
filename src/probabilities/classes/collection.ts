@@ -1,4 +1,9 @@
-import type { DataVariableType, EntryType } from "../types";
+import {
+  isDataVariableType,
+  isEntryType,
+  type DataVariableType,
+  type EntryType,
+} from "../types";
 
 import { Dice } from "./dice";
 
@@ -12,6 +17,20 @@ export class Collection {
   constructor(
     private readonly data: Array<DataVariableType | Dice | EntryType<Dice>>
   ) {}
+
+  flatten(): Array<DataVariableType | Dice> {
+    return this.data.reduce((output, part) => {
+      if (isEntryType(part, (val): val is Dice => val instanceof Dice)) {
+        const [val, count] = part;
+        output.push(...new Array(count).fill(val));
+      } else if (isDataVariableType(part) || part instanceof Dice) {
+        output.push(part);
+      } else {
+        throw new Error("Unexpected value in array");
+      }
+      return output;
+    }, [] as Array<DataVariableType | Dice>);
+  }
   // condense the collection into a single item.
   toSingleItem(): Dice | DataVariableType {
     throw new Error("TODO, collection toItem");

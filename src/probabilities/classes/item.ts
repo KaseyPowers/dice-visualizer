@@ -32,27 +32,6 @@ export class DataItem<
   private readonly tag: Tag;
   private readonly data: Type;
 
-  // Function will be a work in progress as we improve it
-  static parseItem(input: unknown) {
-    if (input instanceof DataItem) {
-      // copy or return unchanged?
-      return input;
-    }
-    // if one of the useable items, use as is.
-    if (isDataItemType(input)) {
-      return DataItem.newItem(input);
-    }
-    // above caught a single variable, next check for other usable types (that can't be minimized)
-
-    // a range can't be simplified
-    if (isDataRangeType(input)) {
-      return DataItem.newDice(input);
-    }
-    let data = input;
-    if (isDataVariableArr(data)) {
-    }
-  }
-
   static newVariable(input: DataVariableType) {
     return new DataItem("var", input);
   }
