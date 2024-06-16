@@ -1,4 +1,4 @@
-import { DataEntryType } from "../types/types";
+import { DataEntryType } from "../../types/types";
 
 // Build based on article here: https://en.wikipedia.org/wiki/Binary_GCD_algorithm
 function makeOdd(input: number): number {

@@ -36,7 +36,7 @@ export function isEntryType<T = unknown>(
 }
 
 export function isDataEntryType(input: unknown): input is DataEntryType {
-  return isEntryType(input, isDataVariableArr);
+  return isEntryType(input, isDataVariableType);
 }
 
 export function isDataVariableArr(
@@ -179,7 +179,7 @@ export function isValidDataEntryArr(
 export function assertDataVariableType(
   input: unknown
 ): asserts input is DataVariableType {
-  if (!isDataVariableArr(input)) {
+  if (!isDataVariableType(input)) {
     throw new Error("Expected a DataVariableType");
   }
 }

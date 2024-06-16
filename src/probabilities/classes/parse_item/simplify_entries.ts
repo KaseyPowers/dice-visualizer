@@ -1,10 +1,18 @@
-import type { DataVariableType, DataEntryType, DataRangeType } from "../types";
-import { dataRangeTotal } from "../types";
+import type {
+  DataVariableType,
+  DataEntryType,
+  DataRangeType,
+} from "@/probabilities/types";
+import type { Dice, DiceInputTypes } from "../dice";
+import { dataRangeTotal } from "@/probabilities/types";
 
 import { toUniqueVarEntries } from "./unique_vars";
 import { minimizeEntryCounts } from "./dice_gcd";
+
 // use when we know the values are unique already.
-export function simplifyUniqueEntries(values: DataEntryType[]) {
+export function simplifyUniqueEntries(
+  values: DataEntryType[]
+): Exclude<DiceInputTypes, Dice> {
   // if single value, return it
   if (values.length === 1) {
     return values[0][0];

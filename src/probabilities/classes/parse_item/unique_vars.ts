@@ -1,5 +1,5 @@
-import type { DataEntryType, DataVariableType } from "../types";
-import { isDataEntryArr, isDataVariableType } from "../types";
+import type { DataEntryType, DataVariableType } from "@/probabilities/types";
+import { isDataVariableType } from "@/probabilities/types";
 
 export function varsAreUnique(
   input: Array<DataEntryType | DataVariableType>
@@ -41,32 +41,36 @@ export function toUniqueVars<T extends DataVariableType | DataEntryType>(
   }
   return makeUniqueVars(input);
 }
-
+// Combine above logics into one function
 export function toUniqueVarEntries(
   input: Array<DataVariableType | DataEntryType>
 ): Array<DataEntryType> {
-  // Duplicate this logic so that I can verify input type while I'm at it.
+  let outputEntries: DataEntryType[] = [];
   let varSet = new Set<DataVariableType>();
-  let isEntryArr = true;
-  const inputUnique = input.every((part) => {
-    let value;
-    if (isDataVariableType(part)) {
-      isEntryArr = false;
-      value = part;
-    } else {
-      value = part[0];
-    }
-    if (varSet.has(value)) {
+  let isUnique = input.every((part) => {
+    const asEntry: DataEntryType = isDataVariableType(part) ? [part, 1] : part;
+    // once a duplicate is found, return
+    if (varSet.has(asEntry[0])) {
       return false;
     }
-    varSet.add(value);
+    // otherwise, add to the output array and set tracking duplicates.
+    outputEntries.push(asEntry);
+    varSet.add(asEntry[0]);
     return true;
   });
-  if (inputUnique) {
-    if (isEntryArr) {
-      return input as DataEntryType[];
-    }
-    return input.map((part) => (isDataVariableType(part) ? [part, 1] : part));
+  // if all unique, the outputEntries is ready to go
+  if (isUnique) {
+    return outputEntries;
   }
-  return makeUniqueVars(input);
+  // otherwise, the outputEntries is unique and can be made into a map to start the process
+  const asMap = new Map(outputEntries);
+  // now iterate through the rest of the input values and add to map
+  for (let i = outputEntries.length; i < input.length; i += 1) {
+    const inputVal = input[i];
+    const [value, count] = isDataVariableType(inputVal)
+      ? [inputVal, 1]
+      : inputVal;
+    asMap.set(value, (asMap.get(value) ?? 0) + count);
+  }
+  return Array.from(asMap);
 }

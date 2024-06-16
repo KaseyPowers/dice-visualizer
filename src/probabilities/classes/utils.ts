@@ -5,6 +5,7 @@ import type {
   DataTagFromItemType,
   DataItemTypeEntry,
 } from "./types";
+import { DataTagOptions } from "./types";
 import {
   assertDataVariableType,
   isDataVariableType,
@@ -63,8 +64,27 @@ export function isDataItemType(input: unknown): input is DataItemType {
     input instanceof Collection
   );
 }
+// Get the tag associated with this type, otherwise throw error
+export function getValueTag(input: DataItemType): DataTagType {
+  // Get Tag based on data
+  if (isDataVariableType(input)) {
+    return "var";
+  }
+  if (input instanceof Dice) {
+    return "dice";
+  }
+  if (input instanceof Collection) {
+    return "collection";
+  }
+  throw new Error("Unexpected data type");
+}
+
 export function isDataItemTypeEntry(
   input: unknown
 ): input is DataItemTypeEntry {
-  return isEntryType(input) && isDataItemType(input[0]);
+  return isEntryType(input, isDataItemType);
+}
+
+export function isDataTagType(input: unknown): input is DataTagType {
+  return DataTagOptions.includes(input as DataTagType);
 }

@@ -11,6 +11,10 @@ import {
   isValidDataEntryArr,
   isValidDataRangeType,
   isValidDataVariableArr,
+  isDataVariableType,
+  isDataRangeType,
+  isDataVariableArr,
+  isDataEntryArr,
 } from "../types";
 
 export type DiceInnerDataTypes =
@@ -18,66 +22,66 @@ export type DiceInnerDataTypes =
   | Array<DataVariableType>
   | Array<DataEntryType>;
 
+export type DiceInputTypes = DataVariableType | DiceInnerDataTypes | Dice;
+
 export class Dice {
   private readonly data: DiceInnerDataTypes;
-  readonly type: "range" | "array" | "dice";
+  // readonly type: "range" | "array" | "dice";
   static assertDice(input: unknown): asserts input is Dice {
     if (!(input instanceof Dice)) {
       throw new Error("Asserted value was a Dice instance");
     }
   }
-  constructor(input: DiceInnerDataTypes | Dice) {
+
+  static isInputType(input: unknown): input is DiceInputTypes {
+    return (
+      input instanceof Dice ||
+      isDataVariableType(input) ||
+      isDataRangeType(input) ||
+      isDataVariableArr(input) ||
+      isDataEntryArr(input)
+    );
+  }
+
+  constructor(input: DiceInputTypes) {
     if (input instanceof Dice) {
       this.data = input.data;
-    } else {
-      this.data = input;
-    }
-    // get type again, to verify that it's valid and correct to input class if needed.
-    if (isValidDataRangeType(this.data, true)) {
-      this.type = "range";
-    } else if (isValidDataVariableArr(this.data, true)) {
-      this.type = "array";
-    } else if (isValidDataEntryArr(this.data, true)) {
-      this.type = "dice";
-    } else {
-      throw new TypeError(
-        "Invalid data type, expected a range, or an array with variables or entries"
-      );
-    }
-
-    if (input instanceof Dice) {
-      if (this.type !== input.type) {
-        throw new Error(
-          `Copying input instance, it had type ${input.type} but checking data got ${this.type}`
-        );
-      }
       this._getTotalCount = input._getTotalCount;
       this._getEntries = input._getEntries;
       this._getValues = input._getValues;
-      // return now to be done constructing
+      // return now to skip standard logic when copying
       return;
     }
-
+    // if creating a dice with a singlue value, assume syntax like `d4` that is a range from 1 to 4
+    this.data = isDataVariableType(input) ? { min: 1, max: input } : input;
     let getTotalCount: typeof this._getTotalCount;
     let getEntries: typeof this._getEntries;
     let getValues: typeof this._getValues;
 
-    // Type and getters are defined every time to make sure they are correct
-    // NOTE: getters should run once (even in copies, so worth doing the assertions to verify)
-    if (this.type === "dice") {
+    if (isValidDataEntryArr(this.data, true)) {
+      // If dice as entry array
       getTotalCount = () => this.entries.length;
       getEntries = () => {
         assertDataEntryArr(this.data, true);
-        return this.data;
+        return this.data.toSorted((a, b) => b[0] - a[0]);
       };
       getValues = () => {
+        // even if not using it, assert to make sure functions didn't get out of sync
+        assertDataEntryArr(this.data, true);
         return this.entries.map((val) => val[0]);
       };
     } else {
       getEntries = () => {
         return this.values.map((val) => [val, 1]);
       };
-      if (this.type === "range") {
+      if (isValidDataVariableArr(this.data, true)) {
+        getTotalCount = () => this.values.length;
+        getValues = () => {
+          assertDataVariableArr(this.data, true);
+          // Insert sorting here if needed
+          return this.data.toSorted((a, b) => b - a);
+        };
+      } else if (isValidDataRangeType(this.data, true)) {
         getTotalCount = () => {
           assertDataRangeType(this.data, true);
           return dataRangeTotal(this.data as DataRangeType);
@@ -92,14 +96,10 @@ export class Dice {
           return output;
         };
       } else {
-        getTotalCount = () => this.values.length;
-        getValues = () => {
-          assertDataVariableArr(this.data, true);
-          // Insert sorting here if needed
-          return this.data;
-        };
+        throw new Error("Unexpected input type");
       }
     }
+
     // wrap each with a getOnce
     this._getTotalCount = getOnce(getTotalCount);
     this._getEntries = getOnce(getEntries);

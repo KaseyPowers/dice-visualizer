@@ -1,103 +1,86 @@
+import { isDataVariableType } from "../types";
+import { DataItemType, DataTagType } from "./types";
+import { assertTagForValue, assertValueForTag, isDataTagType } from "./utils";
+import { getItemAsClosestType } from "./parse_item/get_item_as";
 import {
-  isDataVariableType,
-  DataVariableType,
-  isDataRangeType,
-  isDataVariableArr,
-} from "../types";
-import type {
-  DataTagType,
-  DataItemTypeFromTag,
-  DataItemType,
-  DataTagFromItemType,
-} from "./types";
-import { assertTagForValue, assertValueForTag, isDataItemType } from "./utils";
+  getItemCloseTo,
+  getItem,
+  AllGetItemInputs,
+} from "./parse_item/get_item";
 import { Dice } from "./dice";
 import { Collection } from "./collection";
 
-type UseDataItemTypeFromTag<Tag extends DataTagType> = [DataTagType] extends [
-  Tag
-]
-  ? DataItemType
-  : DataItemTypeFromTag<Tag>;
+type ParsableInput = unknown;
 
-type DataItemTypeFromType<T extends DataItemType> =
-  T extends DataItemTypeFromTag<DataTagFromItemType<T>>
-    ? DataItem<DataTagFromItemType<T>, T>
-    : never;
+export class DataItem {
+  readonly tag: DataTagType;
+  readonly data: DataItemType;
 
-export class DataItem<
-  Tag extends DataTagType = DataTagType,
-  Type extends UseDataItemTypeFromTag<Tag> = UseDataItemTypeFromTag<Tag>
-> {
-  private readonly tag: Tag;
-  private readonly data: Type;
-
-  static newVariable(input: DataVariableType) {
-    return new DataItem("var", input);
-  }
-  // for these types, skip the constructors potentially handling copying of an existing instance, and just pass the reference around
-  static newDice(input: ConstructorParameters<typeof Dice>[0]) {
-    return new DataItem(
-      "dice",
-      input instanceof Dice ? input : new Dice(input)
-    );
-  }
-  static newCollection(
-    input: Collection | ConstructorParameters<typeof Collection>[0]
+  static getItem(
+    tag: DataTagType,
+    input: AllGetItemInputs,
+    strict?: boolean
+  ): DataItem;
+  static getItem(input: AllGetItemInputs): DataItem;
+  static getItem(
+    tagOrInput: DataTagType | AllGetItemInputs,
+    orInput?: AllGetItemInputs,
+    strict?: boolean
   ) {
-    return new DataItem(
-      "collection",
-      input instanceof Collection ? input : new Collection(input)
-    );
-  }
-
-  static newItem<T extends DataItemType>(value: T): DataItemTypeFromType<T>;
-  static newItem(value: DataItemType) {
-    if (isDataVariableType(value)) {
-      return new DataItem("var", value);
-    } else if (value instanceof Dice) {
-      return new DataItem("dice", value);
-    } else if (value instanceof Collection) {
-      return new DataItem("collection", value);
+    let input: AllGetItemInputs;
+    let tag: DataTagType | undefined;
+    if (isDataTagType(tagOrInput)) {
+      tag = tagOrInput;
+      if (typeof orInput === "undefined") {
+        throw new Error(
+          "expected input in second argument if first is the tag"
+        );
+      }
+      input = orInput;
     } else {
-      throw new Error("Unexpected input type", value);
+      input = tagOrInput;
     }
+    // strict handles how closely we want item to be or throwing an error, so don't pass tag to the constructor
+    const item = strict ? getItem(input, tag) : getItemCloseTo(input, tag);
+    return new DataItem(item);
   }
 
-  private constructor(tag: Tag, value: Type) {
-    assertTagForValue(tag, value);
-    assertValueForTag(tag, value);
+  // base constructor accepts pre-built inputs, and will throw an error if a tag is used and the output doesn't match (does try casting input to the desired tag)
+  constructor(tag: DataTagType, value: DataItemType);
+  constructor(value: DataItemType);
+  constructor(tagOrValue: DataTagType | DataItemType, orValue?: DataItemType) {
+    let tag: DataTagType;
+    let data: DataItemType;
+    if (isDataTagType(tagOrValue)) {
+      tag = tagOrValue;
+      if (typeof orValue === "undefined") {
+        throw new Error(
+          "Invalid input, if first param is tag, second shoudld be provided"
+        );
+      }
+      data = orValue;
+      // cast to the desired type if needed.
+      data = getItemAsClosestType(data, tag);
+    } else {
+      data = tagOrValue;
+      // Get Tag based on data
+      if (isDataVariableType(data)) {
+        tag = "var";
+      } else if (data instanceof Dice) {
+        tag = "dice";
+      } else if (data instanceof Collection) {
+        tag = "collection";
+      } else {
+        throw new Error("Unexpected data type");
+      }
+    }
+    // don't need to assert both directions, but feels safer
+    assertTagForValue(tag, data);
+    assertValueForTag(tag, data);
     this.tag = tag;
-    this.data = value;
+    this.data = data;
   }
-
-  // If current type isn't the desired tag, will attempt to convert to the closest type for wrapper function logic
-  toClosestDataType(target: DataTagType): DataItemType {
-    // easy return early if tag and target match
-    if (target === this.tag) {
-      return this.data;
-    }
-    let currentType: DataTagType = this.tag;
-    let data: DataItemType = this.data;
-    // if tag is collection, and we know target is something else, set output data to single item type
-    if (currentType === "collection") {
-      assertValueForTag(currentType, data);
-      data = data.toSingleItem();
-      currentType = data instanceof Dice ? "dice" : "var";
-    }
-    assertValueForTag(currentType, data);
-    // if target is collection, we can convert data up
-    if (target === "collection") {
-      return new Collection([data]);
-      // return DataItem.newCollection([data]);
-    }
-    // if target is dice, can upscale a variable
-    if (target === "dice") {
-      return data instanceof Dice ? data : new Dice([data]);
-      // return DataItem.newDice(data instanceof Dice ? data : [data]);
-    }
-    // all that's left is target = "var" and data that's a var or Dice. So no more casting needed.
-    return data;
-    // return DataItem.newItem(data);
+  getClosestType(target: DataTagType) {
+    return getItemAsClosestType(this.data, target, this.tag);
   }
 }

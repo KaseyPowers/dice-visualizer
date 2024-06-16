@@ -77,11 +77,21 @@ Explode d4:
   - `{1: 5, 2: 5, 3: 5, 5: 2, 6: 2, 7: 2, 8: 2, 9: 2}` total = 25 (5 \* 5), counts: `5 = 25%, 1: 5%`
 
 - Can I use the above logic to "simplify" adding values?
+
   - `{1: 1, 2: 2, 3: 3, 4: 4} + [1, 2]`: left side inner total: 10
   - `{ (1 + {1: 1, 2: 2, 3: 3, 4: 4}): 1, (2 + {1: 1, 2: 2, 3: 3, 4: 4})): 1 }`
   - `{ 2: 1, 3: 2, 4: 3, 5: 4, ({3: 1, 4: 2, 5: 3, 6: 4}): 10}`
   - `{ 2: 10, 3: 20, 4: 30, 5: 40, 3: 10, 4: 20, 5: 30, 6: 40}`
   - `{ 2: 10, 3: 30, 4: 50, 5: 70, 6: 40}` -> `{2: 1, 3: 3, 4: 5, 5: 7, 6: 4}`
+
+- can I condense entries together while flattening?
+  - simple example `{ {1: 1, 2:2}: 1, {1: 1, 2:2}: 1, {1: 1, 2:2}: 1}`
+  - `{1: 1, 2:2, {1: 1, 2:2}: 3, {1: 1, 2:2}: 3}`
+  - `{1:3, 2:6, 1:3, 2:6, {1:1, 2:2}: 9}` -> `{1:6, 2:12, {1:1, 2:2}: 9}`
+  - `{1:9, 2:18, 1:9, 2:18, 1:9, 2:18}` OR `{1:54, 2:108, 1:9, 2:18}`
+  - `{1:27, 2:54}` OR `{1:63, 2:126}`
+  - `{1:1: 2:2}` OR `{1:1, 2:2}`
+  - from this example, looks like the result is the same, but that the numbers can get bigger faster when adding earlier rather than later.
 
 # String Parsing
 
