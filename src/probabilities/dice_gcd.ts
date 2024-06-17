@@ -1,14 +1,13 @@
-import { DataEntryType } from "../../types/types";
-
+import type { VariableEntry } from "./types";
 // Build based on article here: https://en.wikipedia.org/wiki/Binary_GCD_algorithm
-function makeOdd(input: number): number {
+export function makeOdd(input: number): number {
   let output = input;
   while (!(output & 1)) {
-    output >>= 1;
+    output >>>= 1;
   }
   return output;
 }
-function binary_gcd(first: number, second: number): number {
+export function binary_gcd(first: number, second: number): number {
   // Binary operand for 2^x: 1 << x OR: N * 2^x: N << x
   // Binary even check: !(i & 1)
   // Binary divide by 2: i >> 1
@@ -26,7 +25,7 @@ function binary_gcd(first: number, second: number): number {
   b = makeOdd(b);
 
   while (true) {
-    if (a & 1 || b & 1) {
+    if (!(a & 1) || !(b & 1)) {
       throw new Error("Expect both odd");
     }
     // we want a <= b so swap if needed
@@ -41,13 +40,13 @@ function binary_gcd(first: number, second: number): number {
       break;
     }
     // after b-a, b will be even, so make odd again (function skips for 0)
-    makeOdd(b);
+    b = makeOdd(b);
   }
   return a << commonD;
 }
 
 /** Working with entry array directly to hopefully aid efficiency */
-export function dice_entry_gcd(input: DataEntryType[]): number {
+export function dice_entry_gcd(input: VariableEntry[]): number {
   if (input.length <= 1) {
     throw new Error("Expected at least 2 inputs in order to get a gcd value");
   }
@@ -66,7 +65,7 @@ export function dice_entry_gcd(input: DataEntryType[]): number {
 }
 
 // This assumes we have a final set of entries, and will make sure we use the smallest counts possible while retaining the probabilities of each
-export function minimizeEntryCounts(input: DataEntryType[]): DataEntryType[] {
+export function minimizeEntryCounts(input: VariableEntry[]): VariableEntry[] {
   const gcd = dice_entry_gcd(input);
   return gcd > 1 ? input.map(([val, count]) => [val, count / gcd]) : input;
 }
