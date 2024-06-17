@@ -1,4 +1,4 @@
-import type { VariableEntry } from "./types";
+import type { VariableEntry } from "../types";
 // Build based on article here: https://en.wikipedia.org/wiki/Binary_GCD_algorithm
 export function makeOdd(input: number): number {
   let output = input;

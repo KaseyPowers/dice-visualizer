@@ -3,6 +3,7 @@ import type { ProbabilityArray, ProbabilityArrayInputType } from "./prob_arr";
 
 export const DataTagOptions = ["var", "dice", "array"] as const;
 export type DataTagType = (typeof DataTagOptions)[number];
+export type ItemType = Variable | Probability | ProbabilityArray;
 
 export type Variable = number;
 export type VariableInput = number | string;

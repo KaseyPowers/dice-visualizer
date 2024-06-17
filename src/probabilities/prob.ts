@@ -1,7 +1,7 @@
 import { GetterFn } from "@/utils/types";
 import { getOnce } from "@/utils/getter_helpers";
-import { toUniqueVarEntries } from "./unique_vars";
-import { minimizeEntryCounts } from "./dice_gcd";
+import { toUniqueVarEntries } from "./utils/unique_vars";
+import { minimizeEntryCounts } from "./utils/dice_gcd";
 import { EqualityFn, arraysEqual } from "@/utils/equality_helpers";
 
 import type {

@@ -6,10 +6,9 @@ import {
   DataTagValue,
   EntryType,
   OutputTagValue,
+  ItemType,
 } from "./types";
 import { isVariable } from "./var";
-
-type ItemType = Variable | Probability | ProbabilityArray;
 
 function tagForItem(item: ItemType): DataTagType {
   if (item instanceof ProbabilityArray) {

@@ -1,5 +1,5 @@
-import type { Variable, VariableEntry } from "./types";
-import { isVariable } from "./var";
+import type { Variable, VariableEntry } from "../types";
+import { isVariable } from "../var";
 
 // Combine above logics into one function
 export function toUniqueVarEntries(
