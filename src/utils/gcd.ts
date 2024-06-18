@@ -1,4 +1,3 @@
-import type { VariableEntry } from "../types";
 // Build based on article here: https://en.wikipedia.org/wiki/Binary_GCD_algorithm
 export function makeOdd(input: number): number {
   let output = input;
@@ -45,27 +44,17 @@ export function binary_gcd(first: number, second: number): number {
   return a << commonD;
 }
 
-/** Working with entry array directly to hopefully aid efficiency */
-export function dice_entry_gcd(input: VariableEntry[]): number {
-  if (input.length <= 1) {
-    throw new Error("Expected at least 2 inputs in order to get a gcd value");
+export function array_gcd(input: number[]) {
+  if (input.length < 1) {
+    throw new Error("Expected at least 1 values");
   }
-  let output = input[0][1];
-  // Trying using a while loop, as it can be more effient as a way to iterate through the array
-  let index = 1;
-  while (output !== 1 && index < input.length) {
-    const count = input[index][1];
-    if (count < 1) {
-      throw new Error("Expected every count to be greater than or equal to 1");
+  let output = input[0];
+  for (let i = 1; i < input.length && output !== 1; i += 1) {
+    const value = input[i];
+    if (value < 1) {
+      throw new Error("Expected every number to be greater than or equal to 1");
     }
-    output = binary_gcd(output, count);
-    index++;
+    output = binary_gcd(output, value);
   }
   return output;
-}
-
-// This assumes we have a final set of entries, and will make sure we use the smallest counts possible while retaining the probabilities of each
-export function minimizeEntryCounts(input: VariableEntry[]): VariableEntry[] {
-  const gcd = dice_entry_gcd(input);
-  return gcd > 1 ? input.map(([val, count]) => [val, count / gcd]) : input;
 }

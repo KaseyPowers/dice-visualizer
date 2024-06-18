@@ -1,15 +1,11 @@
 "use client";
-import {
-  getProbabilityResults,
-  ItemType,
-  ProbabilityResult,
-} from "@/probabilities";
 import { useMemo } from "react";
 import { LineChart, LineSeriesType } from "@mui/x-charts";
 
-interface InputItemProp {
+import type { DiceResult } from "@/dice/results";
+
+export interface InputItemProp extends DiceResult {
   label?: string;
-  item: ItemType;
 }
 
 export default function DisplayProbabilityResults({
@@ -17,24 +13,18 @@ export default function DisplayProbabilityResults({
 }: {
   items: InputItemProp | InputItemProp[];
 }) {
-  const itemResults = useMemo(() => {
-    return (Array.isArray(items) ? items : [items]).map((itemProp, index) => {
-      if (itemProp.label === "value") {
-        throw new Error("'value' is a reserved key");
-      }
-      return {
-        label: itemProp.label ?? index.toString(),
-        ...getProbabilityResults(itemProp.item),
-      };
-    });
-  }, [items]);
+  const itemArray = useMemo(
+    () => (Array.isArray(items) ? items : [items]),
+    [items]
+  );
 
   const chartProps = useMemo(() => {
     const dataSetMap = new Map<number, Record<string, number>>();
     const series: LineSeriesType[] = [];
+    let minPercentage = 100;
     let maxPercentage = 0;
-    itemResults.forEach((result) => {
-      const { label, values } = result;
+    itemArray.forEach((result, index) => {
+      const { label = index.toString(), values } = result;
       series.push({
         type: "line",
         dataKey: label,
@@ -43,6 +33,9 @@ export default function DisplayProbabilityResults({
         curve: "linear",
       });
       values.forEach((val) => {
+        if (val.percentage < minPercentage) {
+          minPercentage = val.percentage;
+        }
         if (val.percentage > maxPercentage) {
           maxPercentage = val.percentage;
         }
@@ -57,15 +50,10 @@ export default function DisplayProbabilityResults({
       ...obj,
     }));
 
-    let useMax: number;
-    // smaller step up on smaller numbers
-    if (maxPercentage < 20) {
-      // useMax = Math.ceil(maxPercentage) + 2;
-      useMax = (1 + Math.floor(maxPercentage / 2)) * 2;
-    } else {
-      // rounding up to closest factor of 5 (by rounding down + 1, will make sure that on 5 it still increases by 5)
-      useMax = (1 + Math.floor(maxPercentage / 5)) * 5;
-    }
+    const percentageRange = maxPercentage - minPercentage;
+    const offset = Math.max(2, Math.ceil(percentageRange / 10));
+    let useMax = (1 + Math.floor(maxPercentage / offset)) * offset;
+    let useMin = (Math.ceil(minPercentage / offset) - 1) * offset;
     return {
       dataset,
       xAxis: [
@@ -77,11 +65,12 @@ export default function DisplayProbabilityResults({
       yAxis: [
         {
           valueFormatter: (val: number) => `${val}%`,
+          min: useMin,
           max: useMax,
         },
       ],
     };
-  }, [itemResults]);
+  }, [itemArray]);
 
   return (
     <LineChart
