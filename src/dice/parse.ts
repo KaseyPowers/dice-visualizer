@@ -200,7 +200,7 @@ function processDice(values: Array<ParseVals>): void {
     let dCount: VarType | undefined = undefined;
     const dCountVal = getValAt(dIndex - 1);
     if (typeof dCountVal !== "undefined") {
-      dCount = asVar(dCount);
+      dCount = asVar(dCountVal);
       if (!isVarType(dCount)) {
         throw new Error(
           "value before d in dice notation expected to be usable as a single number"
@@ -392,6 +392,6 @@ function splitString(input: string) {
 }
 
 export default function parseString(input: string) {
-  const split = splitString(input);
+  const split = splitString(input.toLowerCase());
   return processValues(split);
 }
