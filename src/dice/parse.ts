@@ -30,17 +30,17 @@ function processParenthesis(values: Array<ParseVals>): void {
       const start = values.indexOf("(");
 
       let count = 1;
-      let end = start + 1;
+      let end = start;
       while (end < values.length && count > 0) {
+        end++;
         const val = values[end];
         if (val === "(") {
           count++;
         } else if (val === ")") {
           count--;
         }
-        end++;
       }
-      if (end >= values.length) {
+      if (count > 0) {
         throw new Error("Couln't find closing parenthesis");
       }
       // grab values between parenthesis
