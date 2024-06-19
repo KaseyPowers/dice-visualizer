@@ -72,7 +72,7 @@ export function simplifyDice(input: DiceType): DiceType {
   if (output.length < 1) {
     throw new Error("Somehow have an empty array for output");
   }
-  const gcd = array_gcd(output.map((ent) => ent[0]));
+  const gcd = array_gcd(output.map((ent) => ent[1]));
   return gcd > 1
     ? output.map(([val, count]) => {
         if (count % gcd !== 0) {
