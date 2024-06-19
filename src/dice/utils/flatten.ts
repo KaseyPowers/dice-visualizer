@@ -5,7 +5,7 @@ import type {
   DiceFnResult,
   DiceArrayFnResult,
 } from "../types";
-import simplifyDice from "./simplify_dice";
+import { simplifyDice } from "./simplify_dice";
 import { diceTotalCount } from "./utils";
 
 export function flattenDiceResults(values: DiceFnResult[]): DiceType {

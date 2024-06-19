@@ -1,6 +1,12 @@
-import { assertType, isDiceArrayType } from "../type_check";
+import { assertType, isDiceArrayType, isVarType } from "../type_check";
 import { asDice } from "../type_convert";
-import type { VarType, DiceType, FnDataType, DiceArrayType } from "../types";
+import type {
+  VarType,
+  DiceType,
+  FnDataType,
+  DiceArrayType,
+  DataType,
+} from "../types";
 import { simplifyDice } from "./simplify_dice";
 
 export type OperationFn = (a: VarType, b: VarType) => VarType;
@@ -18,7 +24,7 @@ const predefinedOperations = {
 export function diceOperation(
   fn: OperationFn | OperationKeys,
   ...items: FnDataType[]
-): FnDataType {
+): DataType {
   if (items.length < 1) {
     throw new Error("Not enough inputs to work with");
   }
@@ -49,9 +55,12 @@ export function diceOperation(
     });
     return simplifyDice(output);
   }
-  const first = items[0];
+  let first = items[0];
+  if (isVarType(first)) {
+    first = asDice(first);
+  }
   let isArray = isDiceArrayType(first);
-  return items.slice(1).reduce<FnDataType>((previous, next) => {
+  return items.slice(1).reduce<DataType>((previous, next) => {
     // if previous is an array, expect second value to be a dice and applied ot each item in the array
     if (isArray) {
       assertType(previous, isDiceArrayType);
@@ -67,19 +76,21 @@ export function diceOperation(
     return betweenDice(asDice(previous), asDice(next));
   }, first);
 }
-type PredefinedOperationFn = (...items: FnDataType[]) => DiceType;
-export const addDice: PredefinedOperationFn = (...items) =>
-  diceOperation("+", ...items);
-export const subtractDice: PredefinedOperationFn = (...items) =>
-  diceOperation("-", ...items);
-export const multiplyDice: PredefinedOperationFn = (...items) =>
-  diceOperation("*", ...items);
-export const divideDice: PredefinedOperationFn = (...items) =>
-  diceOperation("/", ...items);
-export const modDice: PredefinedOperationFn = (...items) =>
-  diceOperation("%", ...items);
+export const addDice = (...items: FnDataType[]) => diceOperation("+", ...items);
 
-export function fnTypeOperation(
-  fn: OperationFn | OperationKeys,
-  ...items: FnDataType[]
-) {}
+// type PredefinedOperationFn = (...items: FnDataType[]) => DiceType;
+// export const addDice: PredefinedOperationFn = (...items) =>
+//   diceOperation("+", ...items);
+// export const subtractDice: PredefinedOperationFn = (...items) =>
+//   diceOperation("-", ...items);
+// export const multiplyDice: PredefinedOperationFn = (...items) =>
+//   diceOperation("*", ...items);
+// export const divideDice: PredefinedOperationFn = (...items) =>
+//   diceOperation("/", ...items);
+// export const modDice: PredefinedOperationFn = (...items) =>
+//   diceOperation("%", ...items);
+
+// export function fnTypeOperation(
+//   fn: OperationFn | OperationKeys,
+//   ...items: FnDataType[]
+// ) {}

@@ -40,14 +40,26 @@ export function assertKeyType<K extends FnDataTypeKey = FnDataTypeKey>(
     throw new Error("Unexpected key value " + key);
   }
 }
+
+function shrinkArray(input: DiceArrayType): DiceType {
+  const value = addDice(...input);
+  if (isDiceArrayType(value)) {
+    throw new Error("Error compressing diceArray, got another diceArray");
+  }
+  return value;
+}
+
 export function asVar(input: undefined | FnDataType): VarType | undefined {
   if (typeof input === "undefined") {
     return;
   }
-  if (isVarType(input)) {
-    return input;
+  let value: FnDataType = input;
+  if (isDiceArrayType(value)) {
+    value = shrinkArray(value);
   }
-  const value = asDice(input);
+  if (isVarType(value)) {
+    return value;
+  }
   // dice can be a variable if it has length 1. Otherwise no
   if (value.length === 1) {
     return value[0][0];
@@ -55,14 +67,15 @@ export function asVar(input: undefined | FnDataType): VarType | undefined {
 }
 
 export function asDice(input: FnDataType): DiceType {
-  if (isVarType(input)) {
-    return [[input, 1]];
+  let value = input;
+  if (isDiceArrayType(value)) {
+    value = shrinkArray(value);
   }
-  if (isDiceType(input)) {
-    return input;
+  if (isVarType(value)) {
+    return [[value, 1]];
   }
-  if (isDiceArrayType(input)) {
-    return addDice(...input);
+  if (isDiceType(value)) {
+    return value;
   }
   throw new Error("Unexpected input type");
 }
