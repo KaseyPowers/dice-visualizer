@@ -1,6 +1,6 @@
 import type { DiceArrayType, DiceType, FnDataType, VarType } from "./types";
 import { createDiceArray, CanBeDiceInputs, createSingleDice } from "./create";
-import { isFnDataType, isVarType } from "./type_check";
+import { isDiceType, isFnDataType, isVarType } from "./type_check";
 import { asDice, asVar } from "./type_convert";
 import {
   AllAvailableOperations,
@@ -47,8 +47,8 @@ function processParenthesis(values: Array<ParseVals>): void {
       const result = processValues(values.slice(start + 1, end));
       // replace the middle and the surrounding parenthesis with the result
       values.splice(
-        Math.max(0, start - 1),
-        2 + (end - start),
+        start,
+        1 + (end - start),
         result
         // ...(result ? [result] : [])
       );
@@ -78,7 +78,7 @@ function processAllArrays(values: Array<ParseVals>): void {
       // grab values between brackets
       const result = processArray(values.slice(start + 1, end));
       // replace the middle and the surrounding brackets with the result
-      values.splice(Math.max(0, start - 1), 2 + (end - start), result);
+      values.splice(start, 1 + (end - start), result);
     }
     // after removing all "]", make sure there aren't any "[" lefover
     if (values.includes("[")) {
@@ -129,7 +129,7 @@ function processArrayContents(
     (val) => typeof val === "string" && val.includes(".")
   );
   if (withDot.length > 0) {
-    if (withDot.length !== 1 || withDot[0] === "..") {
+    if (withDot.length !== 1 || withDot[0] !== "..") {
       throw new Error(
         'incorrect input format, expected array item to have a single ".." and no other inputs with "." inside '
       );
@@ -182,7 +182,7 @@ function processDice(values: Array<ParseVals>): void {
       const valAt = values[index];
       if (typeof valAt !== "string") {
         return valAt;
-      } else if (!(AllAvailableOperations as string[]).includes(valAt)) {
+      } else if (!AllAvailableOperations.includes(valAt as OperationKeys)) {
         throw new Error(
           `The only valid values before "d" are a number or operation, but found ${valAt}`
         );
@@ -220,9 +220,17 @@ function processDice(values: Array<ParseVals>): void {
     // a single number is used as a max range
     if (isVarType(dValue)) {
       diceValue = createSingleDice({ max: dValue });
+    } else if (isDiceType(dValue)) {
+      diceValue = dValue;
     } else {
-      // anything left is already a dice or an array to be shrunk to a single dice
-      diceValue = asDice(dValue);
+      // it's an array, if every value inside can be made a variable, convert.
+      const vars = dValue.map((item) => asVar(item));
+      // if it was successful, use the variables into a single dice
+      if (vars.every(isVarType)) {
+        diceValue = createSingleDice(vars);
+      } else {
+        diceValue = asDice(dValue);
+      }
     }
     const endIndex = dIndex + 1;
     const startIndex = dIndex - (dCountVal ? 1 : 0);
@@ -294,7 +302,7 @@ function processOperations(values: Array<ParseVals>): FnDataType {
 }
 // all valid strings
 type ExpectedStringArrayValuesType = string | RegExp;
-const ParenthesisValues: ExpectedStringArrayValuesType[] = ["[", "]"] as const;
+const ParenthesisValues: ExpectedStringArrayValuesType[] = ["(", ")"] as const;
 const ArrayValues: ExpectedStringArrayValuesType[] = [
   "[",
   "]",

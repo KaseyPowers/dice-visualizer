@@ -73,11 +73,30 @@ export default function DisplayProbabilityResults({
   }, [itemArray]);
 
   return (
-    <LineChart
-      {...chartProps}
-      height={300}
-      margin={{ left: 50, right: 50, top: 50, bottom: 50 }}
-      grid={{ vertical: true, horizontal: true }}
-    />
+    <>
+      <LineChart
+        {...chartProps}
+        height={300}
+        margin={{ left: 50, right: 50, top: 50, bottom: 50 }}
+        grid={{ vertical: true, horizontal: true }}
+      />
+      <div>
+        {itemArray.map((item) => (
+          <div key={item.label}>
+            <div>{`${item.label} - total count: ${item.totalCount}`}</div>
+            <ul>
+              {item.values.map((val) => (
+                <li key={val.value}>
+                  <strong>{val.value}</strong>
+                  {` ${val.percentage.toString().slice(0, 5)}% - (${
+                    val.count
+                  })`}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+    </>
   );
 }
