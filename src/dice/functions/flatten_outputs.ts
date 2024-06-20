@@ -5,8 +5,8 @@ import type {
   DiceFnResult,
   DiceArrayFnResult,
 } from "../types";
-import { simplifyDice } from "./simplify_dice";
-import { diceTotalCount } from "./utils";
+import { simplifyDice } from "../utils/simplify_dice";
+import { diceTotalCount } from "../utils/utils";
 
 export function flattenDiceResults(values: DiceFnResult[]): DiceType {
   const output: DiceType = [];

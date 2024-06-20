@@ -1,13 +1,7 @@
-import { assertType, isDiceArrayType, isVarType } from "../type_check";
 import { asDice } from "../type_convert";
-import type {
-  VarType,
-  DiceType,
-  FnDataType,
-  DiceArrayType,
-  DataType,
-} from "../types";
-import { simplifyDice } from "./simplify_dice";
+import type { VarType, DiceType, FnDataType, DataType } from "../types";
+import { simplifyDice } from "../utils/simplify_dice";
+import { diceString } from "../utils/utils";
 
 export type OperationFn = (a: VarType, b: VarType) => VarType;
 // also use to define order of operations
@@ -24,7 +18,7 @@ const predefinedOperations = {
 export function diceOperation(
   fn: OperationFn | OperationKeys,
   ...items: FnDataType[]
-): DataType {
+): DiceType {
   if (items.length < 1) {
     throw new Error("Not enough inputs to work with");
   }
@@ -44,6 +38,9 @@ export function diceOperation(
     // sipmlify each time to keep numbers in control.
     // If performance optomizing, could be worth comparing closer with variations that do less between and simplify at the end
     return simplifyDice(output);
+    // const simplified = simplifyDice(output);
+    // console.log(diceString(simplified));
+    // return simplified;
   }, asDice(items[0]));
 
   // function betweenDice(a: DiceType, b: DiceType): DiceType {

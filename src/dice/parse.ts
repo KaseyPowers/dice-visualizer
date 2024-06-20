@@ -1,12 +1,18 @@
-import type { DiceArrayType, DiceType, FnDataType, VarType } from "./types";
-import { createDiceArray, CanBeDiceInputs, createSingleDice } from "./create";
+import type {
+  DiceArrayType,
+  DiceType,
+  FnDataType,
+  InnerDiceArrayInput,
+  VarType,
+} from "./types";
+import { createDiceArray, createSingleDice } from "./create";
 import { isDiceType, isFnDataType, isVarType } from "./type_check";
 import { asDice, asVar } from "./type_convert";
 import {
   AllAvailableOperations,
   OperationKeys,
   diceOperation,
-} from "./utils/operations";
+} from "./functions/operations";
 import { arraysEqual } from "@/utils/equality_helpers";
 
 /**
@@ -89,12 +95,11 @@ function processAllArrays(values: Array<ParseVals>): void {
   }
 }
 
-type DiceArrayInnerItemInput = CanBeDiceInputs | DiceArrayType;
 function processArray(inputs: Array<ParseVals>): DiceArrayType {
   if (inputs.includes("[") || inputs.includes("]")) {
     throw new Error("Always parse inner arrays first");
   }
-  const values: Array<DiceArrayInnerItemInput> = [];
+  const values: Array<InnerDiceArrayInput> = [];
   const currentInputs = [...inputs];
   while (currentInputs.length > 0) {
     const nextCommaIndex = currentInputs.indexOf(",");
@@ -120,9 +125,7 @@ function processArray(inputs: Array<ParseVals>): DiceArrayType {
   return createDiceArray(values);
 }
 // special logic for processing each values inside [] brackets, just adding special logic for ranges and making sure there aren't awkward situations when parsing a value into an array.
-function processArrayContents(
-  inputs: Array<ParseVals>
-): DiceArrayInnerItemInput {
+function processArrayContents(inputs: Array<ParseVals>): InnerDiceArrayInput {
   // first checking for range start".."end
   // checking for any "." values, then verify a ".." value
   const withDot = inputs.filter(

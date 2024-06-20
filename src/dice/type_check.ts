@@ -7,6 +7,9 @@ import type {
   VarType,
   DataType,
   FnDataType,
+  RangeInput,
+  DiceInputTypes,
+  ArrayInputType,
 } from "./types";
 import { DataTypeOptions } from "./types";
 
@@ -59,4 +62,31 @@ export function assertType<T>(
       `Incorrectly asserted ${typeStr ? "input is " + typeStr : fn.name}`
     );
   }
+}
+
+function isRangeInput(input: unknown): input is RangeInput {
+  return (
+    !!input &&
+    typeof input === "object" &&
+    "max" in input &&
+    isVarType(input.max) &&
+    (!("min" in input) || isVarType(input.min))
+  );
+}
+function isVarArray(input: unknown): input is Array<VarType> {
+  return Array.isArray(input) && input.every((val) => isVarType(val));
+}
+export function isDiceInput(input: unknown): input is DiceInputTypes {
+  return (
+    isVarType(input) ||
+    isRangeInput(input) ||
+    isVarArray(input) ||
+    isDiceType(input)
+  );
+}
+export function isDiceArrayInput(input: unknown): input is ArrayInputType {
+  return (
+    isDiceInput(input) ||
+    (Array.isArray(input) && input.every((val) => isDiceInput(val)))
+  );
 }

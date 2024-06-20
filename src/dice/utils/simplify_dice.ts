@@ -1,5 +1,6 @@
 import type { VarType, DiceType } from "../types";
 import { array_gcd } from "@/utils/gcd";
+import { sortDice } from "./utils";
 // to help simplify dice when not wanting to fully deal with gcd and such yet
 export function makeDiceUnique(input: DiceType): DiceType {
   if (new Set(input.map((ent) => ent[0])).size === input.length) {
@@ -15,13 +16,18 @@ export function simplifyDice(input: DiceType): DiceType {
   if (input.length <= 0) {
     throw new Error("Emtpy dice not allowed");
   }
+  let failedVal: number;
   if (
     input.some((ent) => {
-      return ent[1] < 1 || !Number.isSafeInteger(ent[1]);
+      const result = ent[1] < 1 || !Number.isSafeInteger(ent[1]);
+      if (result) {
+        failedVal = ent[1];
+      }
+      return result;
     })
   ) {
     throw new Error(
-      "Invalid entry in dice, expect count to be a safe Int  >= 1"
+      `Invalid entry in dice, expect count to be a safe Int  >= 1, received: ${failedVal!}`
     );
   }
   let uniqueIndex = 0;
@@ -73,12 +79,14 @@ export function simplifyDice(input: DiceType): DiceType {
     throw new Error("Somehow have an empty array for output");
   }
   const gcd = array_gcd(output.map((ent) => ent[1]));
-  return gcd > 1
-    ? output.map(([val, count]) => {
-        if (count % gcd !== 0) {
-          throw new Error(`Invalid gcd, expected ${count}%${gcd} to be 0`);
-        }
-        return [val, count / gcd];
-      })
-    : output;
+  if (gcd > 1) {
+    output = output.map(([val, count]) => {
+      if (count % gcd !== 0) {
+        throw new Error(`Invalid gcd, expected ${count}%${gcd} to be 0`);
+      }
+      return [val, count / gcd];
+    });
+  }
+  sortDice(output);
+  return output;
 }
