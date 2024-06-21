@@ -32,15 +32,13 @@ export default function ProcessProbabilities() {
         />
         <Button onClick={processInput}>Parse</Button>
       </Stack>
-      {items === null ? (
+      {items === null ?
         <div>Nothing parsed yet</div>
-      ) : typeof items === "string" ? (
+      : typeof items === "string" ?
         <div>
           Something went wrong! <span>{items}</span>
         </div>
-      ) : (
-        <DisplayProbabilityResults items={items} />
-      )}
+      : <DisplayProbabilityResults items={items} />}
     </div>
   );
 }

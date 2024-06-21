@@ -30,7 +30,7 @@ export function getTypeKey(input: FnDataType): FnDataTypeKey {
 }
 export function assertKeyType<K extends FnDataTypeKey = FnDataTypeKey>(
   key: K,
-  input: unknown
+  input: unknown,
 ): asserts input is FnDataType<K> {
   if (key === "array") {
     assertType(input, isDiceArrayType);
@@ -53,7 +53,7 @@ function shrinkArray(input: DiceArrayType): DiceType {
 
 export function getDataType<Key extends DataTypeKey>(
   input: FnDataType,
-  key: Key
+  key: Key,
 ): DataType<Key>;
 export function getDataType(input: FnDataType, key: DataTypeKey): DataType {
   let value = input;
@@ -77,11 +77,11 @@ export function getDataType(input: FnDataType, key: DataTypeKey): DataType {
 
 export function getClosestType<
   Key extends FnDataTypeKey,
-  Strict extends boolean
+  Strict extends boolean,
 >(key: Key, input: FnDataType): FnDataType<Key> | DataType<AsDataTypeKey<Key>>;
 export function getClosestType(
   key: FnDataTypeKey,
-  input: FnDataType
+  input: FnDataType,
 ): FnDataType | DataType {
   if (key === "var" && isVarType(input)) {
     return input;
@@ -103,22 +103,26 @@ export function getClosestType(
 }
 export function getAsType<Key extends DataTypeKey>(
   key: Key,
-  input: FnDataType
+  input: FnDataType,
 ): DataType<Key>;
 export function getAsType<
   Key extends FnDataTypeKey,
-  Strict extends boolean = true
+  Strict extends boolean = true,
 >(
   key: Key,
   input: FnDataType,
-  strict?: Strict
+  strict?: Strict,
 ):
   | FnDataType<Key>
-  | ("var" extends Key ? (true extends Strict ? never : undefined) : never);
+  | ("var" extends Key ?
+      true extends Strict ?
+        never
+      : undefined
+    : never);
 export function getAsType(
   key: FnDataTypeKey,
   input: FnDataType,
-  strict = true
+  strict = true,
 ): FnDataType | undefined {
   // get closest type, and make sure it lines up before returning.
   const result = getClosestType(key, input);

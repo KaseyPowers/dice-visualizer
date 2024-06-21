@@ -42,12 +42,12 @@ export function dataTypeEqual(a: FnDataType, b: FnDataType): boolean {
   // if the keys aren't equal, try to get both types to match
   if (aKey !== bKey) {
     const largestKey =
-      DataTypeOptions.indexOf(aKey) > DataTypeOptions.indexOf(bKey)
-        ? aKey
-        : bKey;
+      DataTypeOptions.indexOf(aKey) > DataTypeOptions.indexOf(bKey) ?
+        aKey
+      : bKey;
     if (largestKey === "var") {
       throw new Error(
-        "This shouldn't be possible, if they aren't equal, one key must have been 'larger' than var"
+        "This shouldn't be possible, if they aren't equal, one key must have been 'larger' than var",
       );
     }
     compareA = getAsType(largestKey, a);
@@ -70,7 +70,7 @@ export function dataTypeEqual(a: FnDataType, b: FnDataType): boolean {
     return diceArrayEqual(compareA, compareB);
   }
   throw new Error(
-    `Somethign wrong, expected aKey to have been one of the expected values, but got ${aKey}`
+    `Somethign wrong, expected aKey to have been one of the expected values, but got ${aKey}`,
   );
 }
 

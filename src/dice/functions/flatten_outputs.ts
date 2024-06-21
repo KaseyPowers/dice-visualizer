@@ -28,9 +28,9 @@ export function flattenDiceResults(values: DiceFnResult[]): DiceType {
       multiplier = multiplier * valCount;
     }
     output.push(
-      ...(addingMultiplier === 1
-        ? val
-        : val.map<VarEntry>((entry) => [entry[0], entry[1] * addingMultiplier]))
+      ...(addingMultiplier === 1 ? val : (
+        val.map<VarEntry>((entry) => [entry[0], entry[1] * addingMultiplier])
+      )),
     );
   });
 
@@ -38,7 +38,7 @@ export function flattenDiceResults(values: DiceFnResult[]): DiceType {
 }
 
 export function flattenDiceArrayResults(
-  values: DiceArrayFnResult[]
+  values: DiceArrayFnResult[],
 ): DiceArrayType {
   const asDiceResults: DiceFnResult[][] = [];
   values.forEach(([val, count]) => {

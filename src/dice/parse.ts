@@ -55,7 +55,7 @@ function processParenthesis(values: Array<ParseVals>): void {
       values.splice(
         start,
         1 + (end - start),
-        result
+        result,
         // ...(result ? [result] : [])
       );
     }
@@ -89,7 +89,7 @@ function processAllArrays(values: Array<ParseVals>): void {
     // after removing all "]", make sure there aren't any "[" lefover
     if (values.includes("[")) {
       throw new Error(
-        "Error processing brackets, there are opening brackets left over"
+        "Error processing brackets, there are opening brackets left over",
       );
     }
   }
@@ -129,12 +129,12 @@ function processArrayContents(inputs: Array<ParseVals>): InnerDiceArrayInput {
   // first checking for range start".."end
   // checking for any "." values, then verify a ".." value
   const withDot = inputs.filter(
-    (val) => typeof val === "string" && val.includes(".")
+    (val) => typeof val === "string" && val.includes("."),
   );
   if (withDot.length > 0) {
     if (withDot.length !== 1 || withDot[0] !== "..") {
       throw new Error(
-        'incorrect input format, expected array item to have a single ".." and no other inputs with "." inside '
+        'incorrect input format, expected array item to have a single ".." and no other inputs with "." inside ',
       );
     }
     const rangeMiddle = inputs.indexOf("..");
@@ -143,7 +143,7 @@ function processArrayContents(inputs: Array<ParseVals>): InnerDiceArrayInput {
     // still using varType to ignore 0 as a falsy number
     if (!isVarType(leftSide) || !isVarType(rightSide)) {
       throw new Error(
-        "invalid input, left and right side of range epxected to be numbers"
+        "invalid input, left and right side of range epxected to be numbers",
       );
     }
     // if equal, just return an array with the one value
@@ -166,12 +166,12 @@ function processArrayContents(inputs: Array<ParseVals>): InnerDiceArrayInput {
   const result = processValues(inputs);
   if (typeof result === "string") {
     throw new Error(
-      `in array, got a value processed to ${result}, this is not expected or handled yet`
+      `in array, got a value processed to ${result}, this is not expected or handled yet`,
     );
   }
   if (typeof result === "undefined") {
     throw new Error(
-      "Processing array item, received undefined, ignore or throw error?"
+      "Processing array item, received undefined, ignore or throw error?",
     );
   }
   return result;
@@ -187,7 +187,7 @@ function processDice(values: Array<ParseVals>): void {
         return valAt;
       } else if (!AllAvailableOperations.includes(valAt as OperationKeys)) {
         throw new Error(
-          `The only valid values before "d" are a number or operation, but found ${valAt}`
+          `The only valid values before "d" are a number or operation, but found ${valAt}`,
         );
       }
       // At this point, we expect every value to be a "d", operation or value, so only throw an error if 2 "d"s next to each other
@@ -206,7 +206,7 @@ function processDice(values: Array<ParseVals>): void {
       dCount = asVar(dCountVal);
       if (!isVarType(dCount)) {
         throw new Error(
-          "value before d in dice notation expected to be usable as a single number"
+          "value before d in dice notation expected to be usable as a single number",
         );
       }
       if (dCount < 1) {
@@ -216,7 +216,7 @@ function processDice(values: Array<ParseVals>): void {
     const dValue = getValAt(dIndex + 1);
     if (typeof dValue === "undefined") {
       throw new Error(
-        'Expected a value immediately after "d", is there an accidental space?'
+        'Expected a value immediately after "d", is there an accidental space?',
       );
     }
     let diceValue: DiceType;
@@ -238,8 +238,9 @@ function processDice(values: Array<ParseVals>): void {
     const endIndex = dIndex + 1;
     const startIndex = dIndex - (dCountVal ? 1 : 0);
     // if there is a count, create an array of the dice with that many values, and run through createDiceArray to make sure it's valid.
-    const replaceValue = dCountVal
-      ? createDiceArray(new Array(dCount).fill(diceValue))
+    const replaceValue =
+      dCountVal ?
+        createDiceArray(new Array(dCount).fill(diceValue))
       : diceValue;
     // replace the middle and the surrounding parenthesis with the result
     values.splice(startIndex, 1 + (endIndex - startIndex), replaceValue);
@@ -253,8 +254,8 @@ type TreeNodes =
   | { op: OperationKeys; left: TreeNodes; right: TreeNodes };
 function processOperations(values: Array<ParseVals>): FnDataType {
   const validInput = values.every((val, index) => {
-    return index % 2 === 0
-      ? isFnDataType(val)
+    return index % 2 === 0 ?
+        isFnDataType(val)
       : typeof val === "string" &&
           AllAvailableOperations.includes(val as OperationKeys);
   });
@@ -298,7 +299,7 @@ function processOperations(values: Array<ParseVals>): FnDataType {
     return diceOperation(
       input.op,
       processNode(input.left),
-      processNode(input.right)
+      processNode(input.right),
     );
   }
   return processNode(asTree);
@@ -322,19 +323,19 @@ const AllExpectedStrings: ExpectedStringArrayValuesType[] = [
 
 function validateExpectedStrings(
   inputs: Array<ParseVals>,
-  expected: ExpectedStringArrayValuesType[]
+  expected: ExpectedStringArrayValuesType[],
 ) {
   // return the first invalid value index, ideally will return -1
   const foundInvalid = inputs.findIndex(
     (val) =>
       typeof val === "string" &&
       !expected.some((exp) =>
-        typeof exp === "string" ? exp === val : exp.test(val)
-      )
+        typeof exp === "string" ? exp === val : exp.test(val),
+      ),
   );
   if (foundInvalid >= 0) {
     throw new Error(
-      `found unexpected string value in array: ${inputs[foundInvalid]}`
+      `found unexpected string value in array: ${inputs[foundInvalid]}`,
     );
   }
 }
@@ -351,7 +352,7 @@ function processValues(inputs: Array<ParseVals>): FnDataType {
   processParenthesis(values);
   // after parenthesis, filter them out of expected strings
   expectedStrings = expectedStrings.filter(
-    (val) => !ParenthesisValues.includes(val)
+    (val) => !ParenthesisValues.includes(val),
   );
   validateExpectedStrings(values, expectedStrings);
   // handle all array values
@@ -364,7 +365,7 @@ function processValues(inputs: Array<ParseVals>): FnDataType {
   expectedStrings = expectedStrings.filter((val) => val !== "d");
   if (!arraysEqual(expectedStrings, AllAvailableOperations)) {
     throw new Error(
-      "Expected strings array should only have operations at this point"
+      "Expected strings array should only have operations at this point",
     );
   }
   validateExpectedStrings(values, expectedStrings);

@@ -18,7 +18,7 @@ import type {
 } from "./internal_types";
 
 function isFnKeyFirst(
-  input: unknown
+  input: unknown,
 ): input is [FnDataTypeKey | Array<FnDataTypeKey>, FnDataTypeKey, InputFnDef] {
   return (
     Array.isArray(input) &&
@@ -29,35 +29,35 @@ function isFnKeyFirst(
 
 export function wrapFunction<
   InParams extends FnDataType[],
-  Out extends FnDataTypeKey
+  Out extends FnDataTypeKey,
 >(
   fn: InputFnDef<InParams>,
   inputKeys: InputKeyTypeForParams<InParams>,
-  out: Out
+  out: Out,
 ): OutputFunctionType<InParams, Out>;
 export function wrapFunction<
   Input extends FnDataTypeKey,
-  Out extends FnDataTypeKey
+  Out extends FnDataTypeKey,
 >(
   inputKey: Input,
   out: Out,
-  fn: InputFnDefFromKeys<Input[]>
+  fn: InputFnDefFromKeys<Input[]>,
 ): OutputFunctionType<Input[], Out>;
 export function wrapFunction<
   Input extends FnDataTypeKey,
-  Out extends FnDataTypeKey
+  Out extends FnDataTypeKey,
 >(
   fn: InputFnDefFromKeys<Input[]>,
   inputKeys: Input,
-  out: Out
+  out: Out,
 ): OutputFunctionType<Input[], Out>;
 export function wrapFunction<
   Inputs extends FnDataTypeKey[],
-  Out extends FnDataTypeKey
+  Out extends FnDataTypeKey,
 >(
   fn: InputFnDefFromKeys<Inputs>,
   inputKeys: Inputs,
-  out: Out
+  out: Out,
 ): OutputFunctionType<Inputs, Out>;
 export function wrapFunction(
   ...args:
@@ -76,8 +76,9 @@ OutputFunctionType {
     [fn, inputKeys, out] = args;
   }
 
-  const getKey = Array.isArray(inputKeys)
-    ? (index: number) => inputKeys[index]
+  const getKey =
+    Array.isArray(inputKeys) ?
+      (index: number) => inputKeys[index]
     : () => inputKeys;
 
   const buildTarget = out === "var" ? "dice" : out;

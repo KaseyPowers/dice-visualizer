@@ -16,7 +16,7 @@ export function checkIsEqual<T>(a: T, b: T, fn?: EqualityOrComparitor<T>) {
 export function arraysEqual<T>(
   a: ReadonlyArray<T>,
   b: ReadonlyArray<T>,
-  valFn?: EqualityOrComparitor<T>
+  valFn?: EqualityOrComparitor<T>,
 ): boolean {
   return (
     a.length === b.length &&
@@ -27,7 +27,7 @@ export function arraysEqual<T>(
 export function arrayContentsEqual<T>(
   a: ReadonlyArray<T>,
   b: ReadonlyArray<T>,
-  sortCallback: Comparitor<T>
+  sortCallback: Comparitor<T>,
 ): boolean {
   return (
     arraysEqual(a, b, sortCallback) ||
@@ -35,7 +35,7 @@ export function arrayContentsEqual<T>(
       arraysEqual(
         a.toSorted(sortCallback),
         b.toSorted(sortCallback),
-        sortCallback
+        sortCallback,
       ))
   );
 }

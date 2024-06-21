@@ -48,12 +48,12 @@ export type OutputFunctionReturns<Out extends FnDataTypeKey = FnDataTypeKey> =
 
 export type OutputFunctionType<
   Inputs extends unknown[] = unknown[],
-  Out extends FnDataTypeKey = FnDataTypeKey
+  Out extends FnDataTypeKey = FnDataTypeKey,
 > = (...items: MapToAnyFnDataType<Inputs>) => OutputFunctionReturns<Out>;
 
 export type BuildOutputsFn = (
   items: FnDataType[],
   getKey: (index: number) => FnDataTypeKey,
   fn: InputFnDef,
-  outputKey: DataTypeKey
+  outputKey: DataTypeKey,
 ) => Entry<OutputFunctionReturns>[];

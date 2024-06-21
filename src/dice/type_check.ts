@@ -21,7 +21,7 @@ type TypeCheckFn<T> = (input: unknown) => input is T;
 
 export function isEntry<T>(
   input: unknown,
-  fn: TypeCheckFn<T>
+  fn: TypeCheckFn<T>,
 ): input is Entry<T> {
   return (
     Array.isArray(input) &&
@@ -55,11 +55,11 @@ export function isFnDataType(input: unknown): input is FnDataType {
 export function assertType<T>(
   input: unknown,
   fn: TypeCheckFn<T>,
-  typeStr?: string
+  typeStr?: string,
 ): asserts input is T {
   if (!fn(input)) {
     throw new Error(
-      `Incorrectly asserted ${typeStr ? "input is " + typeStr : fn.name}`
+      `Incorrectly asserted ${typeStr ? "input is " + typeStr : fn.name}`,
     );
   }
 }

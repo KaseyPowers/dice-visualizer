@@ -10,7 +10,7 @@ import { diceEqual, dataTypeEqual, diceArrayEqual } from "../utils/utils";
 describe("fn_wrapper", () => {
   describe("example: add", () => {
     const addFn = wrapFunction("var", "var", (...vals) =>
-      vals.reduce((output, val) => output + val, 0)
+      vals.reduce((output, val) => output + val, 0),
     );
 
     it("should allow adding variables and return a variable", () => {
@@ -71,7 +71,7 @@ describe("fn_wrapper", () => {
   describe("wrapArraySpreadFn", () => {
     describe("example: highest of collection", () => {
       const largestVal = wrapArraySpreadFn("var", "var", (...vals) =>
-        Math.max(...vals)
+        Math.max(...vals),
       );
 
       it("should return expected for highest of 2d4", () => {
@@ -90,7 +90,7 @@ describe("fn_wrapper", () => {
 
     describe("example: sort array", () => {
       const sortedArr = wrapArraySpreadFn("var", "array", (...vals) =>
-        vals.toSorted((a, b) => b - a)
+        vals.toSorted((a, b) => b - a),
       );
 
       it("should return sorted values", () => {
@@ -111,7 +111,7 @@ describe("fn_wrapper", () => {
         expect(isDiceArrayType(result)).toBeTruthy();
         expect(result).toHaveLength(2);
         expect(
-          diceArrayEqual(result, [expectedDice1, expectedDice2])
+          diceArrayEqual(result, [expectedDice1, expectedDice2]),
         ).toBeTruthy();
       });
 

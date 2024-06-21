@@ -40,7 +40,7 @@ export function createDiceArray(input: DataTypeInput<"array">): DiceArrayType {
   let inputVal = input;
   if (isDiceType(inputVal)) {
     console.warn(
-      "This input for an array is valid as an array input, or could be a single valid dice. and as such could have some unexpected behavior."
+      "This input for an array is valid as an array input, or could be a single valid dice. and as such could have some unexpected behavior.",
     );
     inputVal = [inputVal];
   }
@@ -59,11 +59,11 @@ export function createDiceArray(input: DataTypeInput<"array">): DiceArrayType {
 // will expect a specific set of inputs based on k
 export function createAsType<K extends FnDataTypeKey>(
   key: K,
-  input: DataTypeInput<K>
+  input: DataTypeInput<K>,
 ): FnDataType<K>;
 export function createAsType(
   key: FnDataTypeKey,
-  input: DataTypeInput
+  input: DataTypeInput,
 ): FnDataType {
   // first check for the types that are already valid
   let value: FnDataType;

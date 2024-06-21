@@ -17,7 +17,7 @@ const packageJson = require("./package.json");
 // const { DiceArrayType } = require("@/dice/types");
 
 const wrappedAdd = wrapFunction("var", "var", (...vals) =>
-  vals.reduce((output, val) => output + val, 0)
+  vals.reduce((output, val) => output + val, 0),
 );
 // const diceValRange = { max: 100, min: 4 };
 const diceValRange = { max: 20, min: 4 };
@@ -61,5 +61,5 @@ b.suite(
   b.complete(),
   b.save(saveOptions),
   b.save({ ...saveOptions, format: "table.html" }),
-  b.save({ ...saveOptions, format: "chart.html" })
+  b.save({ ...saveOptions, format: "chart.html" }),
 );

@@ -4,9 +4,8 @@ export const DataTypeOptions = ["var", "dice", "array"] as const;
 export type FnDataTypeKey = (typeof DataTypeOptions)[number];
 export type DataTypeKey = Exclude<FnDataTypeKey, "var">;
 
-export type AsDataTypeKey<K extends FnDataTypeKey> = K extends DataTypeKey
-  ? K
-  : "dice";
+export type AsDataTypeKey<K extends FnDataTypeKey> =
+  K extends DataTypeKey ? K : "dice";
 
 export type VarType = number;
 export type VarEntry = Entry<VarType>;
@@ -16,20 +15,19 @@ export type DiceArrayType = DiceType[]; // 3d-array
 export type DiceFnResult = Entry<DiceType>;
 export type DiceArrayFnResult = Entry<DiceArrayType>;
 
-type DataTypeForKey<K extends FnDataTypeKey> = "array" extends K
-  ? DiceArrayType
-  : "dice" extends K
-  ? DiceType
-  : "var" extends K
-  ? VarType
+type DataTypeForKey<K extends FnDataTypeKey> =
+  "array" extends K ? DiceArrayType
+  : "dice" extends K ? DiceType
+  : "var" extends K ? VarType
   : never;
 
 type _DataKeyForType<
   Type extends FnDataType,
-  Key extends FnDataTypeKey = FnDataTypeKey
-> = Key extends FnDataTypeKey
-  ? FnDataType<Key> extends Type
-    ? Key
+  Key extends FnDataTypeKey = FnDataTypeKey,
+> =
+  Key extends FnDataTypeKey ?
+    FnDataType<Key> extends Type ?
+      Key
     : never
   : never;
 
@@ -53,12 +51,10 @@ export type DiceInputTypes = VarType | RangeInput | Array<VarType> | DiceType;
 export type InnerDiceArrayInput = DiceInputTypes | DiceArrayType;
 export type ArrayInputType = InnerDiceArrayInput | Array<InnerDiceArrayInput>;
 
-export type InputTypeForKey<Key extends FnDataTypeKey> = "array" extends Key
-  ? ArrayInputType
-  : "dice" extends Key
-  ? DiceInputTypes
-  : "var" extends Key
-  ? VarType
+export type InputTypeForKey<Key extends FnDataTypeKey> =
+  "array" extends Key ? ArrayInputType
+  : "dice" extends Key ? DiceInputTypes
+  : "var" extends Key ? VarType
   : never;
 
 type InputTypeMap = {

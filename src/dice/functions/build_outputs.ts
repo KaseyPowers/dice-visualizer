@@ -7,11 +7,11 @@ export const buildRecursive: BuildOutputsFn = function (
   items,
   getKey,
   fn,
-  outputKey
+  outputKey,
 ) {
   function buildOutputs(
     params: FnDataType[],
-    count: number
+    count: number,
   ): Entry<OutputFunctionReturns>[] {
     const index = params.length;
     if (index >= items.length) {
@@ -28,7 +28,7 @@ export const buildRecursive: BuildOutputsFn = function (
     // the only combination that should be possible here is dice but target "var", verify here
     if (target !== "var" || itemKey !== "dice") {
       throw new Error(
-        `Only type mismatch expected is target "var" and with "dice", but received target "${target}" and item "${itemKey}"`
+        `Only type mismatch expected is target "var" and with "dice", but received target "${target}" and item "${itemKey}"`,
       );
     }
     assertKeyType(itemKey, item);
@@ -45,7 +45,7 @@ export const buildOutputs: BuildOutputsFn = function (
   items,
   getKey,
   fn,
-  outputKey
+  outputKey,
 ) {
   let inputs: InputsEntry = [[[], 1]];
 
@@ -63,13 +63,13 @@ export const buildOutputs: BuildOutputsFn = function (
     // the only combination that should be possible here is dice but target "var", verify here
     if (target !== "var" || itemKey !== "dice") {
       throw new Error(
-        `Only type mismatch expected is target "var" and with "dice", but received target "${target}" and item "${itemKey}"`
+        `Only type mismatch expected is target "var" and with "dice", but received target "${target}" and item "${itemKey}"`,
       );
     }
     assertKeyType(itemKey, item);
     inputs = item.reduce<InputsEntry>((output, entry) => {
       return output.concat(
-        inputs.map((input) => [[...input[0], entry[0]], input[1] + entry[1]])
+        inputs.map((input) => [[...input[0], entry[0]], input[1] + entry[1]]),
       );
     }, []);
   });

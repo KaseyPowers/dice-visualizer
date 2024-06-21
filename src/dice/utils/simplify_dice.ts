@@ -27,7 +27,7 @@ export function simplifyDice(input: DiceType): DiceType {
     })
   ) {
     throw new Error(
-      `Invalid entry in dice, expect count to be a safe Int  >= 1, received: ${failedVal!}`
+      `Invalid entry in dice, expect count to be a safe Int  >= 1, received: ${failedVal!}`,
     );
   }
   let uniqueIndex = 0;
@@ -66,7 +66,7 @@ export function simplifyDice(input: DiceType): DiceType {
     // quickly check if all counts are same, then repeat logic from isUnique and same count.
     if (
       output.every(
-        (ent, index, arr) => index === 0 || ent[1] === arr[index - 1][1]
+        (ent, index, arr) => index === 0 || ent[1] === arr[index - 1][1],
       )
     ) {
       if (output[0][1] === 1) {

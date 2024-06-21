@@ -15,7 +15,7 @@ export default function DisplayProbabilityResults({
 }) {
   const itemArray = useMemo(
     () => (Array.isArray(items) ? items : [items]),
-    [items]
+    [items],
   );
 
   const chartProps = useMemo(() => {
