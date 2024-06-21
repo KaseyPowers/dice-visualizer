@@ -1,70 +1,21 @@
 import type {
-  AsDataTypeKey,
   FnDataType,
   FnDataTypeKey,
-  DataType,
   DiceFnResult,
   DiceArrayFnResult,
-  Entry,
-  DataTypeInput,
-  DataKeyForType,
-  DiceArrayType,
-  VarType,
-  DataTypeKey,
 } from "../types";
-import {
-  asVar,
-  assertKeyType,
-  getClosestType,
-  getTypeKey,
-} from "../type_convert";
+import { asVar } from "../type_convert";
 import { flattenDiceArrayResults, flattenDiceResults } from "./flatten_outputs";
-import { createAsType } from "../create";
-import { ArrayItemType, IsSingleTypeArray } from "@/utils/types";
 import { isDataTypeKey } from "../type_check";
 
-import { buildRecursive, buildOutputs } from "./build_outputs";
+import { buildOutputs } from "./build_outputs";
 
-type InputFnDef<Inputs extends FnDataType[] = FnDataType[]> = (
-  ...inputs: Inputs
-) => DataTypeInput;
-type MapKeysToType<Keys extends Array<FnDataTypeKey>> = {
-  [K in keyof Keys]: FnDataType<Keys[K]>;
-};
-type InputFnDefFromKeys<Keys extends Array<FnDataTypeKey>> = InputFnDef<
-  MapKeysToType<Keys>
->;
-type MapTypesToKeys<Types extends Array<FnDataType>> = {
-  [P in keyof Types]: DataKeyForType<Types[P]>;
-};
-
-type InputKeysForArr<Keys extends FnDataTypeKey[]> =
-  | Keys
-  | IsSingleTypeArray<Keys, ArrayItemType<Keys>>;
-
-type InputKeysByParams<Params extends FnDataType[]> = InputKeysForArr<
-  MapTypesToKeys<Params>
->;
-
-type MapToAnyFnDataType<Input extends unknown[] = unknown[]> = {
-  [K in keyof Input]: FnDataType;
-};
-
-export type OutputFunctionReturns<Out extends FnDataTypeKey = FnDataTypeKey> =
-  | DataType<AsDataTypeKey<Out>>
-  | FnDataType<Out>;
-
-type OutputFunctionType<
-  Inputs extends unknown[] = unknown[],
-  Out extends FnDataTypeKey = FnDataTypeKey
-> = (...items: MapToAnyFnDataType<Inputs>) => OutputFunctionReturns<Out>;
-
-export type BuildOutputsFn = (
-  items: FnDataType[],
-  getKey: (index: number) => FnDataTypeKey,
-  fn: InputFnDef,
-  outputKey: DataTypeKey
-) => Entry<OutputFunctionReturns>[];
+import type {
+  InputFnDef,
+  InputKeyTypeForParams,
+  OutputFunctionType,
+  InputFnDefFromKeys,
+} from "./internal_types";
 
 function isFnKeyFirst(
   input: unknown
@@ -81,7 +32,7 @@ export function wrapFunction<
   Out extends FnDataTypeKey
 >(
   fn: InputFnDef<InParams>,
-  inputKeys: InputKeysByParams<InParams>,
+  inputKeys: InputKeyTypeForParams<InParams>,
   out: Out
 ): OutputFunctionType<InParams, Out>;
 export function wrapFunction<
@@ -146,16 +97,4 @@ OutputFunctionType {
     }
     return finalDice;
   };
-}
-
-export function wrapArraySpreadFn<
-  SpreadType extends Exclude<FnDataTypeKey, "array">,
-  Out extends FnDataTypeKey
->(spreadInput: SpreadType, out: Out, fn: InputFnDefFromKeys<SpreadType[]>) {
-  const innerFn = wrapFunction(fn, spreadInput, out);
-  return wrapFunction(
-    (array: DiceArrayType) => innerFn(...array),
-    "array",
-    out
-  );
 }

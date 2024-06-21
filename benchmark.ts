@@ -25,49 +25,9 @@ function randomNum({ min = 1, max }: { max: number; min?: number }): number {
   return min + Math.round((max - min) * Math.random());
 }
 const inputs: DiceType[] = [];
-while (inputs.length < 5) {
+while (inputs.length <= 5) {
   inputs.push(createSingleDice({ max: randomNum(diceValRange) }));
 }
-
-// function addCases(size: number, diceAsRange: boolean) {
-//   const inputs: InnerDiceArrayInput[] = [];
-//   while (inputs.length < size) {
-//     const diceSize = randomNum(diceValRange);
-//     if (diceAsRange) {
-//       inputs.push({ max: diceSize });
-//     } else {
-//       const doubleThreshold = Math.max(2, Math.ceil(diceSize / 3));
-//       const vals = [];
-//       while (vals.length < diceSize) {
-//         const nextVal = randomNum(diceValRange);
-//         vals.push(nextVal);
-//         // using this to make sure there is always at least one duplicate
-//         if (vals.length < doubleThreshold) {
-//           vals.push(nextVal);
-//         }
-//       }
-//       inputs.push(vals);
-//     }
-//   }
-//   const suffix = `:(${size})-unique:${diceAsRange}`;
-//   return [
-//     b.add(`operator add${suffix}`, () => {
-//       const arr = createDiceArray(inputs);
-//       return () => addDice(...arr);
-//     }),
-//     b.add(`wrappedAdd${suffix}`, () => {
-//       const arr = createDiceArray(inputs);
-//       return () => wrappedAdd(...arr);
-//     }),
-//   ];
-// }
-
-// function addCaseSizes(sizes: number[]) {
-//   return sizes.reduce<ReturnType<typeof addCases>>((output, size) => {
-//     output.push(...addCases(size, true), ...addCases(size, false));
-//     return output;
-//   }, []);
-// }
 
 const saveOptions = {
   file: "operations",
@@ -77,6 +37,20 @@ const saveOptions = {
 
 b.suite(
   "operations",
+  b.add("operator add vars", () => {
+    const arr = Array.from({ length: 100 }, (_, i) => i);
+    return () => addDice(...arr);
+  }),
+  b.add("wrapped add vars", () => {
+    const arr = Array.from({ length: 100 }, (_, i) => i);
+    return () => addDice(...arr);
+  }),
+  b.add(`operator add 2`, () => {
+    addDice(...inputs.slice(0, 2));
+  }),
+  b.add(`wrappedAdd 2`, () => {
+    addDice(...inputs.slice(0, 2));
+  }),
   b.add(`operator add`, () => {
     addDice(...inputs);
   }),

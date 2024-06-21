@@ -1,27 +1,7 @@
-import type {
-  AsDataTypeKey,
-  FnDataType,
-  FnDataTypeKey,
-  DataType,
-  DiceFnResult,
-  DiceArrayFnResult,
-  Entry,
-  DataTypeInput,
-  DataKeyForType,
-  DiceArrayType,
-  VarType,
-} from "../types";
-import {
-  asVar,
-  assertKeyType,
-  getClosestType,
-  getTypeKey,
-} from "../type_convert";
-import { flattenDiceArrayResults, flattenDiceResults } from "./flatten_outputs";
+import type { FnDataType, Entry } from "../types";
+import { assertKeyType, getClosestType, getTypeKey } from "../type_convert";
 import { createAsType } from "../create";
-import { ArrayItemType, IsSingleTypeArray } from "@/utils/types";
-import { isDataTypeKey } from "../type_check";
-import type { BuildOutputsFn, OutputFunctionReturns } from "./fn_wrapper";
+import type { BuildOutputsFn, OutputFunctionReturns } from "./internal_types";
 
 export const buildRecursive: BuildOutputsFn = function (
   items,

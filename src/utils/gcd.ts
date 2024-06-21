@@ -7,6 +7,9 @@ export function makeOdd(input: number): number {
   return output;
 }
 export function binary_gcd(first: number, second: number): number {
+  if (first === 1 || second === 1) {
+    return 1;
+  }
   // Binary operand for 2^x: 1 << x OR: N * 2^x: N << x
   // Binary even check: !(i & 1)
   // Binary divide by 2: i >> 1
