@@ -10,32 +10,35 @@ export const buildRecursive: BuildOutputsFn = function (
   outputKey,
 ) {
   function buildOutputs(
-    params: FnDataType[],
+    prevParams: FnDataType[],
     count: number,
   ): Entry<OutputFunctionReturns>[] {
-    const index = params.length;
-    if (index >= items.length) {
-      const result = createAsType(outputKey, fn(...params));
-      return [[result, count]];
+    const nextParams = [...prevParams];
+    while (nextParams.length < items.length) {
+      const index = nextParams.length;
+      const target = getKey(index);
+      // we should get item as closest to the type needed for target
+      const item = getClosestType(target, items[index]);
+      const itemKey = getTypeKey(item);
+      if (itemKey !== target) {
+        // the only combination that should be possible here is dice but target "var", verify here
+        if (target !== "var" || itemKey !== "dice") {
+          throw new Error(
+            `Only type mismatch expected is target "var" and with "dice", but received target "${target}" and item "${itemKey}"`,
+          );
+        }
+        assertKeyType("dice", item);
+        return item.reduce<Entry<OutputFunctionReturns>[]>((output, entry) => {
+          output.push(
+            ...buildOutputs([...nextParams, entry[0]], count + entry[1]),
+          );
+          return output;
+        }, []);
+      }
+      nextParams.push(item);
     }
-    const target = getKey(index);
-    // we should get item as closest to the type needed for target
-    const item = getClosestType(target, items[index]);
-    const itemKey = getTypeKey(item);
-    if (itemKey === target) {
-      return buildOutputs([...params, item], count);
-    }
-    // the only combination that should be possible here is dice but target "var", verify here
-    if (target !== "var" || itemKey !== "dice") {
-      throw new Error(
-        `Only type mismatch expected is target "var" and with "dice", but received target "${target}" and item "${itemKey}"`,
-      );
-    }
-    assertKeyType(itemKey, item);
-    return item.reduce<Entry<OutputFunctionReturns>[]>((output, entry) => {
-      output.push(...buildOutputs([...params, entry[0]], count + entry[1]));
-      return output;
-    }, []);
+    const results = createAsType(outputKey, fn(...nextParams));
+    return [[results, count]];
   }
   return buildOutputs([], 1);
 };

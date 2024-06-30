@@ -22,8 +22,12 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <AppRouterCacheProvider>
-          <CssBaseline />
-          <Container maxWidth="lg" component="main" sx={{ marginTop: 4 }}>
+          <CssBaseline enableColorScheme />
+          <Container
+            maxWidth="lg"
+            component="main"
+            sx={{ paddingY: 4, height: "100vh" }}
+          >
             {children}
           </Container>
         </AppRouterCacheProvider>

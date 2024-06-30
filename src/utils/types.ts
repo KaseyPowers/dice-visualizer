@@ -1,3 +1,5 @@
+export type PartPartial<Type, Keys extends keyof Type> = Omit<Type, Keys> &
+  Partial<Pick<Type, Keys>>;
 // https://github.com/joonhocho/tsdef/tree/master
 // https://github.com/Microsoft/TypeScript/issues/26051
 export type ExtendExact<T, X extends T> = T & {

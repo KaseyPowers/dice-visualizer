@@ -8,7 +8,7 @@ import { asVar } from "../type_convert";
 import { flattenDiceArrayResults, flattenDiceResults } from "./flatten_outputs";
 import { isDataTypeKey } from "../type_check";
 
-import { buildOutputs } from "./build_outputs";
+import { buildOutputs, buildRecursive } from "./build_outputs";
 
 import type {
   InputFnDef,
@@ -16,6 +16,10 @@ import type {
   OutputFunctionType,
   InputFnDefFromKeys,
 } from "./internal_types";
+
+const useRecursive = true;
+
+const useBuildOutputs = useRecursive ? buildRecursive : buildOutputs;
 
 function isFnKeyFirst(
   input: unknown,
@@ -84,7 +88,7 @@ OutputFunctionType {
   const buildTarget = out === "var" ? "dice" : out;
 
   return function (...items) {
-    const allOutputs = buildOutputs(items, getKey, fn, buildTarget);
+    const allOutputs = useBuildOutputs(items, getKey, fn, buildTarget);
     if (out === "array") {
       return flattenDiceArrayResults(allOutputs as DiceArrayFnResult[]);
     }

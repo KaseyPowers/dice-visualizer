@@ -1,20 +1,25 @@
 "use client";
 import { useCallback, useState } from "react";
+import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
-import { DiceResult, parseDiceResults } from "@/dice/results";
-import DisplayProbabilityResults, { type InputItemProp } from "./results";
-import { Stack } from "@mui/material";
+import Stack from "@mui/material/Stack";
+import { parseDiceResults } from "@/dice/results";
+import DisplayProbabilityResults, { type InputSeriesData } from "./results";
 
 export default function ProcessProbabilities() {
   const [input, setInput] = useState<string>("");
-  const [items, setItems] = useState<InputItemProp | null | string>(null);
+  const [items, setItems] = useState<InputSeriesData | null | string>(null);
   const processInput = useCallback(() => {
-    let nextItem: InputItemProp | string | null = null;
+    let nextItem: InputSeriesData | string | null = null;
     const trimmed = input.trim();
     if (trimmed.length > 0) {
       try {
-        nextItem = { label: trimmed, ...parseDiceResults(trimmed) };
+        const results = parseDiceResults(trimmed);
+        nextItem = {
+          label: trimmed,
+          values: results.values,
+        };
       } catch (err) {
         nextItem = err instanceof Error ? err.message : "Parsing Failed";
       }
@@ -22,8 +27,15 @@ export default function ProcessProbabilities() {
     setItems(nextItem);
   }, [input, setItems]);
   return (
-    <div>
-      <Stack direction="row">
+    <Stack
+      direction="column"
+      alignItems="stretch"
+      spacing={2}
+      useFlexGap
+      height="100%"
+      maxHeight="100%"
+    >
+      <Stack direction="row" justifyContent="center">
         <TextField
           label="Input"
           variant="outlined"
@@ -32,13 +44,13 @@ export default function ProcessProbabilities() {
         />
         <Button onClick={processInput}>Parse</Button>
       </Stack>
-      {items === null ?
-        <div>Nothing parsed yet</div>
-      : typeof items === "string" ?
-        <div>
-          Something went wrong! <span>{items}</span>
-        </div>
-      : <DisplayProbabilityResults items={items} />}
-    </div>
+      <Box flex="1 1 0%" padding={2} minWidth={0} minHeight={0}>
+        {typeof items === "string" ?
+          <div>
+            Something went wrong! <span>{items}</span>
+          </div>
+        : <DisplayProbabilityResults data={items ? [items] : []} />}
+      </Box>
+    </Stack>
   );
 }
