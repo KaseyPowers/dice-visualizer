@@ -7,7 +7,7 @@ import type {
   CombinedOptionValues,
   AddNewOptionFn,
 } from "./types";
-import { SeriesOptionsDefaults } from "./constants";
+import { SeriesOptionsDefaults, SeriesOptionsKeys } from "./constants";
 
 type AllSeriesOptions = Partial<Record<string, SeriesOptions[]>>;
 
@@ -194,18 +194,6 @@ function useAllSeriesOptionsState(
   return { allOptions, setSeriesOption, addNewOption, removeOption };
 }
 
-const SeriesOptionsKeys: Array<keyof SeriesOptions> = [
-  "step",
-  "range",
-  "mod",
-  "color",
-];
-const allMods: Array<SeriesOptions["mod"]> = [
-  "atLeast",
-  "atMost",
-  "equalDown",
-  "equalUp",
-];
 export default function useSeriesOptions(
   ids: string[],
   options: SeriesOptionsValuesObject,
@@ -232,16 +220,19 @@ export default function useSeriesOptions(
 
       const seriesStatic = options[id]?.static;
       const seriesDefault = options[id]?.default;
-
-      const next: CombinedOptionValues = {
-        currentOptions,
-        // colors are the only default that changes
-        defaultOptions: [],
-      };
       const commonDefault = {
         ...defaultSeriesOptions,
         ...seriesDefault,
       };
+
+      const next: CombinedOptionValues = {
+        static: seriesStatic ?? {},
+        default: commonDefault,
+        currentOptions,
+        // colors are the only default that changes
+        defaultOptions: [],
+      };
+
       for (let i = 0; i < currentOptions.length; i++) {
         let color: string;
         if ("color" in commonDefault) {

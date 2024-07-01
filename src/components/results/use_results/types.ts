@@ -42,8 +42,7 @@ export interface AddNewOptionFn {
   (): void;
 }
 
-export interface CombinedOptionValues
-  extends Pick<SeriesOptionValues, "static"> {
+export interface CombinedOptionValues extends Required<SeriesOptionValues> {
   updateOption?: <Key extends keyof SeriesOptions>(
     index: number,
     key: Key,
