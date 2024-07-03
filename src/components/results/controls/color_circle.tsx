@@ -6,11 +6,7 @@ import ListItem from "@mui/material/ListItem";
 import ListItemText from "@mui/material/ListItemText";
 import ListItemAvatar from "@mui/material/ListItemAvatar";
 import AddIcon from "@mui/icons-material/Add";
-import {
-  CombinedOptionValues,
-  SeriesData,
-  SeriesOptions,
-} from "../use_results";
+import { CombinedOptionValues, SeriesData, SeriesConfig } from "../use_results";
 
 export type ColorProp = BoxProps["color"];
 type CircleProps = {

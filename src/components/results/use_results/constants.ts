@@ -1,25 +1,30 @@
-import type { ChartOptions, SeriesOptions } from "./types";
+import type {
+  ChartConfig,
+  ModType,
+  SeriesConfig,
+  SeriesPartConfig,
+} from "./types";
 import { blueberryTwilightPalette } from "@mui/x-charts/colorPalettes";
 
-export const SeriesOptionsKeys: Array<keyof SeriesOptions> = [
+export const SeriesPartConfigKeys: Array<keyof SeriesPartConfig> = [
   "step",
   "range",
   "mod",
+  "label",
   "color",
-];
-export const allMods: Array<SeriesOptions["mod"]> = [
+] as const;
+
+export const allMods: Array<ModType> = [
   "atLeast",
   "atMost",
   "equalDown",
   "equalUp",
 ];
 
-export const ChartOptionsDefaults: ChartOptions = {
-  step: 1,
+export const ChartConfigDefaults: ChartConfig = {
   colors: blueberryTwilightPalette,
 };
 
-export const SeriesOptionsDefaults: SeriesOptions = {
-  step: 1,
+export const SeriesConfigDefaults: SeriesConfig = {
   mod: "equalUp",
 };

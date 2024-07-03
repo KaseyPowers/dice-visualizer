@@ -1,32 +1,18 @@
 import { useState, useMemo, useCallback } from "react";
 import Box from "@mui/material/Box";
-import IconButton from "@mui/material/IconButton";
-import List from "@mui/material/List";
-import Collapse from "@mui/material/Collapse";
-import ListItem from "@mui/material/ListItem";
-import ListItemText from "@mui/material/ListItemText";
-import ListItemAvatar from "@mui/material/ListItemAvatar";
-import AddIcon from "@mui/icons-material/Add";
-
 import TextField from "@mui/material/TextField";
 import MenuItem from "@mui/material/MenuItem";
 
-import {
-  CombinedOptionValues,
-  SeriesData,
-  SeriesOptions,
-  SeriesOptionsKeys,
-  allMods,
-} from "../use_results";
+import { SeriesConfig, SeriesPartConfig, allMods } from "../use_results";
 import { Button } from "@mui/material";
 
 interface OptionItemControlProps {
-  staticValues?: SeriesOptions | undefined;
-  defaultValues: SeriesOptions;
-  value: SeriesOptions;
-  onChange: <Key extends keyof SeriesOptions>(
+  staticValues?: Partial<SeriesConfig> | undefined;
+  defaultValues: SeriesPartConfig | SeriesConfig;
+  value: Partial<SeriesPartConfig>;
+  onChange: <Key extends keyof SeriesPartConfig>(
     key: Key,
-    value: SeriesOptions[Key],
+    value: SeriesPartConfig[Key],
   ) => void;
 }
 
@@ -41,21 +27,29 @@ function OptionItemControlFields({
     [staticValues?.step, defaultValues?.step, value.step],
   );
 
-  const { modOptions, modValue } = useMemo(() => {
+  const { modOptions, modValue, modDisabled } = useMemo(() => {
     if (staticValues?.mod) {
-      return { modValue: staticValues.mod, modOptions: [staticValues.mod] };
+      return {
+        modValue: staticValues.mod,
+        modOptions: [staticValues.mod],
+        modDisabled: true,
+      };
     }
 
-    let modValue = value.mod ?? defaultValues.mod ?? "";
-    let modOptions =
-      stepValue !== 1 ? allMods : (
-        allMods.filter(
-          (val) => val && (val === modValue || !val.startsWith("equal")),
-        )
+    const modValue = value.mod ?? defaultValues.mod ?? "";
+    let modOptions = allMods;
+    if (stepValue === 1) {
+      modOptions = allMods.filter(
+        (val) => val && (val === modValue || !val.startsWith("equal")),
       );
+      if (!modValue.startsWith("equal")) {
+        modOptions.push("equalUp");
+      }
+    }
     return {
       modValue,
       modOptions,
+      modDisabled: false,
     };
   }, [stepValue, staticValues?.mod, value.mod, defaultValues.mod]);
 
@@ -66,15 +60,13 @@ function OptionItemControlFields({
         fullWidth
         select
         label="Mod Type"
-        disabled={!!staticValues?.mod}
+        disabled={modDisabled}
         value={modValue}
-        onChange={(e) =>
-          onChange("mod", e.target.value as SeriesOptions["mod"])
-        }
+        onChange={(e) => onChange("mod", e.target.value as SeriesConfig["mod"])}
       >
         {modOptions.map((mod) => (
           <MenuItem key={mod} value={mod}>
-            {mod}
+            {stepValue === 1 && mod.startsWith("equal") ? "equal" : mod}
           </MenuItem>
         ))}
       </TextField>
@@ -97,9 +89,9 @@ export function NewOptionControls({
   onSubmit,
   ...rest
 }: Omit<OptionItemControlProps, "onChange"> & {
-  onSubmit: (values: SeriesOptions) => void;
+  onSubmit: (values: SeriesConfig) => void;
 }) {
-  const [value, setValueState] = useState<SeriesOptions>(initValues);
+  const [value, setValueState] = useState<SeriesConfig>(initValues);
 
   const onChange = useCallback<OptionItemControlProps["onChange"]>(
     (key, value) => {

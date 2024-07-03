@@ -1,30 +1,21 @@
 import { useMemo, useState, useCallback } from "react";
-import type { ChartOptions } from "./types";
+import type { ChartConfig } from "./types";
 import { isValidRangeType } from "./utils";
-import { ChartOptionsDefaults } from "./constants";
+import { ChartConfigDefaults } from "./constants";
 
-type ChartOptionsFn = <Key extends keyof ChartOptions>(
-  key: Key,
-  value?: ChartOptions[Key],
-) => void;
-
-export default function useChartOptions(inputDefaults?: ChartOptions) {
-  const defaultOptions = useMemo(
+export default function useChartConfig(inputConfig?: ChartConfig) {
+  const defaultConfig = useMemo(
     () => ({
-      ...ChartOptionsDefaults,
-      ...inputDefaults,
+      ...ChartConfigDefaults,
+      ...inputConfig,
     }),
-    [inputDefaults],
+    [inputConfig],
   );
-  const [chartOptions, setChartOptionsState] =
-    useState<ChartOptions>(defaultOptions);
+  const [chartConfig, setChartConfigState] =
+    useState<ChartConfig>(defaultConfig);
 
-  //   <Key extends keyof ChartOptions>(
-  //     key: Key,
-  //     value?: ChartOptions[Key] | undefined,
-  //   ): void;
-  const setChartOptions = useCallback<ChartOptionsFn>(
-    (key: keyof ChartOptions, value?: ChartOptions[keyof ChartOptions]) => {
+  const setChartConfig = useCallback(
+    <Key extends keyof ChartConfig>(key: Key, value?: ChartConfig[Key]) => {
       let val = value;
       if (typeof value !== "undefined") {
         if (key === "step" && (typeof value !== "number" || value <= 0)) {
@@ -35,10 +26,10 @@ export default function useChartOptions(inputDefaults?: ChartOptions) {
         // all that's left is key === "colors" which I'll just leave for material to validate
       }
       // if val is same as defaultOption, treat it as resetting to undefined
-      if (typeof val !== "undefined" && val === defaultOptions[key]) {
+      if (typeof val !== "undefined" && val === defaultConfig[key]) {
         val = undefined;
       }
-      setChartOptionsState((current) => {
+      setChartConfigState((current) => {
         // if no changes to make, return current;
         if (
           key in current ? current[key] === val : typeof val === "undefined"
@@ -56,11 +47,11 @@ export default function useChartOptions(inputDefaults?: ChartOptions) {
         };
       });
     },
-    [defaultOptions, setChartOptionsState],
+    [defaultConfig, setChartConfigState],
   );
 
   return {
-    chartOptions,
-    setChartOptions,
+    chartConfig,
+    setChartConfig,
   };
 }

@@ -1,8 +1,8 @@
 import type {
-  ChartOptions,
+  ChartConfig,
   DataItem,
   RangeType,
-  SeriesOptions,
+  SeriesConfig,
   SeriesData,
 } from "./types";
 

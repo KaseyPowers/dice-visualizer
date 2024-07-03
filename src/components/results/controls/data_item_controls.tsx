@@ -18,11 +18,7 @@ import ExpandLess from "@mui/icons-material/ExpandLess";
 import ExpandMore from "@mui/icons-material/ExpandMore";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 
-import {
-  CombinedOptionValues,
-  SeriesData,
-  SeriesOptions,
-} from "../use_results";
+import { FullSeriesData, SeriesData, SeriesConfig } from "../use_results";
 import SeriesItemTitle, { SeriesItemTitleProps } from "./series_item_title";
 import {
   OptionItemControls,
@@ -31,28 +27,23 @@ import {
 import { useCallback, useMemo, useState } from "react";
 
 import useItemControls from "./use_item_controls";
+import { defaultConfig } from "next/dist/server/config-shared";
 
 const leftIndent = 28;
 
-export default function DataItemControls({
-  item,
-  option,
-}: {
-  item: SeriesData;
-  option: CombinedOptionValues;
-}) {
-  const { label, id } = item;
+export default function DataItemControls({ item }: { item: FullSeriesData }) {
   const {
-    addNewOption,
-    removeOption,
-    updateOption,
-    currentOptions,
-    defaultOptions,
-    static: staticOptions,
-    default: baseDefault,
-  } = option;
+    id,
+    label,
+    addConfig,
+    removeConfig,
+    update,
+    partConfigs,
+    staticConfig,
+    defaultConfig,
+  } = item;
 
-  const childCount = currentOptions.length;
+  const childCount = partConfigs.length;
   const canShowChildren = childCount > 1;
 
   const {
@@ -64,14 +55,14 @@ export default function DataItemControls({
     addingVal,
     onAddNew,
     onAddComplete,
-  } = useItemControls(childCount, !!addNewOption);
+  } = useItemControls(childCount, !!addConfig);
 
   const addSubmit = useCallback(
-    (value: SeriesOptions) => {
-      addNewOption!(value);
+    (value: SeriesConfig) => {
+      addConfig!(value);
       onAddComplete();
     },
-    [addNewOption, onAddComplete],
+    [addConfig, onAddComplete],
   );
 
   return (
@@ -81,7 +72,9 @@ export default function DataItemControls({
         iconWidth={leftIndent}
         color={
           childCount > 0 ?
-            defaultOptions.map((opt) => opt.color!)
+            partConfigs.map(
+              (part) => part.config.color ?? part.defaultConfig.color!,
+            )
           : "text.disabled"
         }
         icon={
@@ -112,21 +105,19 @@ export default function DataItemControls({
               alignItems="stretch"
             >
               {childCount > 0 &&
-                Array.from({ length: childCount }, (_, i) => i).map((i) => {
-                  const thisId = `${id}_${i}`;
-                  const thisDefault = defaultOptions[i];
-                  const thisOption = currentOptions[i];
+                partConfigs.map((part, i) => {
+                  const partLabel =
+                    part.config.label ?? part.defaultConfig.label!;
+                  const thisId = `${id}_${partLabel}`;
 
                   return (
                     <div key={thisId}>
                       {childCount > 1 && (
                         <SeriesItemTitle
-                          color={thisDefault.color!}
+                          color={part.config.color ?? part.defaultConfig.color!}
                           onClick={() => onToggleClick!(i)}
-                          onAdd={
-                            onAddNew && (() => onAddNew({ ...thisOption }))
-                          }
-                          onRemove={removeOption && (() => removeOption(i))}
+                          onAdd={onAddNew && (() => onAddNew(part.config))}
+                          onRemove={removeConfig && (() => removeConfig(i))}
                         />
                       )}
                       <Collapse
@@ -135,25 +126,23 @@ export default function DataItemControls({
                         unmountOnExit
                       >
                         <OptionItemControls
-                          staticValues={staticOptions}
-                          defaultValues={thisDefault}
-                          value={thisOption}
-                          onChange={(key, value) =>
-                            updateOption!(i, key, value)
-                          }
+                          staticValues={staticConfig}
+                          defaultValues={part.defaultConfig}
+                          value={part.config}
+                          onChange={(key, value) => update!(i, key, value)}
                         />
                       </Collapse>
                       <Divider />
                     </div>
                   );
                 })}
-              {addNewOption && (
+              {addConfig && (
                 <>
                   <Collapse in={isAdding} timeout="auto" unmountOnExit>
                     <NewOptionControls
                       value={addingVal!}
-                      defaultValues={baseDefault}
-                      staticValues={staticOptions}
+                      defaultValues={defaultConfig}
+                      staticValues={staticConfig}
                       onSubmit={(value) => addSubmit(value)}
                     />
                     <Divider />

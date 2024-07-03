@@ -30,7 +30,7 @@ const otherProps = {
 >;
 
 export default function DisplayProbabilityResults(props: InputItemProps) {
-  const { chartData, data, seriesOptions } = useResults(props);
+  const { chartData, fullData } = useResults(props);
   // const isVertical = true;
   const theme = useTheme();
   const isVertical = useMediaQuery(theme.breakpoints.down("md"));
@@ -54,7 +54,7 @@ export default function DisplayProbabilityResults(props: InputItemProps) {
           <LineChart {...otherProps} {...chartData} />
         </Box>
         <Box flex="1 1 0%" minWidth={0} padding={2}>
-          <SeriesControls data={data} options={seriesOptions} />
+          <SeriesControls data={fullData} />
         </Box>
       </Stack>
     </Paper>

@@ -1,5 +1,5 @@
 import { useState, useCallback, useMemo, useReducer, useEffect } from "react";
-import type { SeriesOptions } from "../use_results";
+import type { SeriesPartConfig } from "../use_results";
 
 export default function useItemControls(childCount: number, canAdd: boolean) {
   const canShowChildren = useMemo(() => childCount > 1, [childCount]);
@@ -37,13 +37,13 @@ export default function useItemControls(childCount: number, canAdd: boolean) {
 
   const [adding, setAddingState] = useState<null | {
     show: boolean;
-    value: SeriesOptions;
+    value: Partial<SeriesPartConfig>;
   }>(null);
   const isAdding = useMemo(() => !!adding?.show, [adding?.show]);
   const addingVal = useMemo(() => adding?.value, [adding?.value]);
   const onAddNew = useMemo(() => {
     if (canAdd) {
-      return (value: SeriesOptions = {}) =>
+      return (value: Partial<SeriesPartConfig> = {}) =>
         setAddingState({ show: true, value });
     }
   }, [canAdd, setAddingState]);

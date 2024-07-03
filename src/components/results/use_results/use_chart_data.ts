@@ -2,20 +2,16 @@ import { useMemo } from "react";
 import type {
   LineSeriesType,
   AxisConfig,
-  ResponsiveChartContainerProps,
   ChartsXAxisProps,
   ChartsYAxisProps,
 } from "@mui/x-charts";
 
-import type {
-  ChartOptions,
-  SeriesData,
-  CombinedSeriesData,
-  CombinedOptionValues,
-} from "./types";
+import type { ChartConfig, SeriesData, FullSeriesData } from "./types";
 import { percentStrings } from "./utils";
 
-import getSeriesData from "./get_series_data";
+import applySeriesConfig from "./apply_series_config";
+
+type AppliedSeriesData = ReturnType<typeof applySeriesConfig>;
 
 type PercentAxisType = AxisConfig<"linear", number, ChartsYAxisProps>;
 type ValueAxisType = AxisConfig<"linear", number, ChartsXAxisProps>;
@@ -29,41 +25,7 @@ const valueAxisBase: ValueAxisType = {
   scaleType: "linear",
 };
 
-function getAllSeriesData(
-  data: SeriesData[],
-  options: Record<string, CombinedOptionValues>,
-) {
-  const output: CombinedSeriesData[] = [];
-  data.forEach((item) => {
-    const { currentOptions, defaultOptions } = options[item.id];
-    if (currentOptions.length === 1) {
-      output.push(
-        getSeriesData(item, {
-          ...defaultOptions[0],
-          ...currentOptions[0],
-        }),
-      );
-    } else {
-      for (let i = 0; i < currentOptions.length; i++) {
-        const opt = currentOptions[i];
-        const def = defaultOptions[i];
-        output.push(
-          getSeriesData(
-            item,
-            {
-              ...def,
-              ...opt,
-            },
-            i,
-          ),
-        );
-      }
-    }
-  });
-  return output;
-}
-
-function getBaseAxisData(data: CombinedSeriesData[]) {
+function getBaseAxisData(data: AppliedSeriesData[]) {
   const percentAxis: PercentAxisType = { ...percentAxisBase };
   const valueAxis: ValueAxisType = { ...valueAxisBase, data: [] };
   const series: LineSeriesType[] = [];
@@ -109,13 +71,18 @@ function getBaseAxisData(data: CombinedSeriesData[]) {
 }
 
 export default function useChartData(
-  data: SeriesData[],
-  options: Record<string, CombinedOptionValues>,
-  chartOptions: ChartOptions,
+  data: FullSeriesData[],
+  chartOptions: ChartConfig,
 ) {
   const allSeries = useMemo(
-    () => getAllSeriesData(data, options),
-    [data, options],
+    () =>
+      data.reduce<Array<AppliedSeriesData>>((output, item) => {
+        const { partConfigs, ...rest } = item;
+        return output.concat(
+          partConfigs.map((part) => applySeriesConfig(rest, part)),
+        );
+      }, []),
+    [data],
   );
   const baseData = useMemo(() => getBaseAxisData(allSeries), [allSeries]);
 

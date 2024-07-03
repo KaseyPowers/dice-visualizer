@@ -1,16 +1,17 @@
 import type {
   DataItem,
-  SeriesOptions,
+  SeriesConfig,
   SeriesData,
   RangeType,
-  CombinedSeriesData,
+  FullSeriesData,
+  SeriesPartConfig,
 } from "./types";
 import { keepSmallerRange } from "./utils";
 
-function getRange(datasRange: RangeType, options: SeriesOptions) {
+function getRange(dataRange: RangeType, options: SeriesConfig) {
   const step = options.step ?? 1;
   const range =
-    options.range ? keepSmallerRange(datasRange, options.range) : datasRange;
+    options.range ? keepSmallerRange(dataRange, options.range) : dataRange;
   // shift min-max to closest step
   if (step !== 1) {
     // let msg = `shifting range for step(${step}): before - ${range.toString()}`;
@@ -27,13 +28,19 @@ function getRange(datasRange: RangeType, options: SeriesOptions) {
   return { range, step };
 }
 
-export default function getSeriesData(
-  data: SeriesData,
-  options: SeriesOptions,
-  index?: number,
-): CombinedSeriesData {
-  const dataVals = data.values;
-  const { range, step } = getRange(data.range, options);
+export default function applySeriesConfig(
+  baseData: SeriesData,
+  configs: FullSeriesData["partConfigs"][number],
+) {
+  const { id, label, values: dataVals } = baseData;
+  const options: SeriesPartConfig = {
+    ...baseData.defaultConfig,
+    ...configs.defaultConfig,
+    ...configs.config,
+    ...baseData.staticConfig,
+  };
+
+  const { range, step } = getRange(baseData.range, options);
   const [min, max] = range;
 
   const values: DataItem[] = [];
@@ -74,16 +81,11 @@ export default function getSeriesData(
     }
     dataI += direction;
   }
-  let { id, label } = data;
-  if (typeof index !== "undefined") {
-    id += "_" + index;
-    label += "_" + index;
-  }
-  const color = options.color!;
+
   return {
-    id,
-    label,
+    id: id + options.label,
+    label: label + options.label,
     values,
-    color,
+    color: options.color!,
   };
 }
