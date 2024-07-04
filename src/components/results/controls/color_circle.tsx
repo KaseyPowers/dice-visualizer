@@ -1,17 +1,9 @@
 import Box, { BoxProps } from "@mui/material/Box";
-import IconButton from "@mui/material/IconButton";
-import List from "@mui/material/List";
-import Collapse from "@mui/material/Collapse";
-import ListItem from "@mui/material/ListItem";
-import ListItemText from "@mui/material/ListItemText";
-import ListItemAvatar from "@mui/material/ListItemAvatar";
-import AddIcon from "@mui/icons-material/Add";
-import { CombinedOptionValues, SeriesData, SeriesConfig } from "../use_results";
 
 export type ColorProp = BoxProps["color"];
 type CircleProps = {
   color: ColorProp;
-} & Pick<BoxProps, "marginLeft" | "marginX">;
+} & Pick<BoxProps, "marginLeft" | "marginRight">;
 
 const circleSize = 2;
 
@@ -39,7 +31,11 @@ export default function ColorCircle(
 ) {
   if ("color" in props) {
     return (
-      <Circle color={props.color} marginLeft={-1 + (props.marginLeft ?? 0)} />
+      <Circle
+        color={props.color}
+        marginLeft={-1 + (props.marginLeft ?? 0)}
+        marginRight={1}
+      />
     );
   }
   return (

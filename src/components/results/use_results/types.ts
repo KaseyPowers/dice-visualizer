@@ -55,11 +55,12 @@ export interface SeriesData extends BaseSeriesData {
   defaultConfig: SeriesConfig;
 }
 
+export interface FullSeriesDataPart {
+  config: Partial<SeriesPartConfig>;
+  defaultConfig: SeriesPartConfig;
+}
 export interface FullSeriesData extends SeriesData {
-  partConfigs: Array<{
-    config: Partial<SeriesPartConfig>;
-    defaultConfig: SeriesPartConfig;
-  }>;
+  partConfigs: Array<FullSeriesDataPart>;
   update?: <Key extends keyof SeriesPartConfig>(
     index: number,
     key: Key,

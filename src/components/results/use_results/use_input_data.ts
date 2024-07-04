@@ -10,6 +10,7 @@ function processInputData(inputData: InputSeriesData[]) {
       throw new Error("Missing largest?");
     }
     const range: RangeType = [values[0].value, max.value];
+    console.log(`input range: ${range}`);
     const output: SeriesData = {
       id: input.id ?? input.label,
       label: input.label,

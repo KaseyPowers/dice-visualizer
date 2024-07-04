@@ -1,80 +1,48 @@
 import { useState, useCallback, useMemo, useReducer, useEffect } from "react";
 import type { SeriesPartConfig } from "../use_results";
 
-export default function useItemControls(childCount: number, canAdd: boolean) {
-  const canShowChildren = useMemo(() => childCount > 1, [childCount]);
-  const [showChildren, setShowChildren] = useState<boolean>(canShowChildren);
-  useEffect(() => {
-    if (!canShowChildren) {
-      setShowChildren(false);
-    }
-  }, [setShowChildren, canShowChildren]);
-  const [updating, setUpdatingState] = useState<null | number>(null);
-
-  const onToggleClick = useMemo(() => {
-    if (childCount > 0) {
-      // if only one child, this function only ever toggles updating state
-      if (childCount === 1) {
-        return () => setUpdatingState((current) => (current === 0 ? null : 0));
-      }
-
-      return (index?: number) => {
-        // if number, toggling an index (updating)
-        if (typeof index === "number") {
-          setUpdatingState((current) => (current === index ? null : index));
-        } else {
-          setShowChildren((wasOpen) => {
-            // if hiding children, make sure to remove updating value too
-            if (wasOpen) {
-              setUpdatingState(null);
-            }
-            return !wasOpen;
-          });
-        }
-      };
-    }
-  }, [childCount, setUpdatingState, setShowChildren]);
-
-  const [adding, setAddingState] = useState<null | {
-    show: boolean;
-    value: Partial<SeriesPartConfig>;
-  }>(null);
-  const isAdding = useMemo(() => !!adding?.show, [adding?.show]);
-  const addingVal = useMemo(() => adding?.value, [adding?.value]);
-  const onAddNew = useMemo(() => {
-    if (canAdd) {
-      return (value: Partial<SeriesPartConfig> = {}) =>
-        setAddingState({ show: true, value });
-    }
-  }, [canAdd, setAddingState]);
-  const onAddComplete = useCallback(
-    () => setAddingState(null),
-    [setAddingState],
-  );
+export default function useControlState(
+  onAdd?: (value: Partial<SeriesPartConfig>) => void,
+) {
+  const [open, setOpen] = useState<boolean | "add">(false);
+  const canAdd = !!onAdd;
   useEffect(() => {
     if (!canAdd) {
-      onAddComplete();
+      setOpen((val) => {
+        if (val === "add") {
+          return false;
+        }
+        return val;
+      });
     }
-  }, [onAddComplete, canAdd]);
+  }, [setOpen, canAdd]);
 
-  const isOpen = useMemo(
-    () => showChildren || isAdding || typeof updating === "number",
-    [showChildren, isAdding, updating],
-  );
-  const canOpen = useMemo(
-    () => canShowChildren || canAdd,
-    [canShowChildren, canAdd],
+  const submitAdd = useCallback(
+    (value: Partial<SeriesPartConfig> = {}) => {
+      if (!onAdd) {
+        throw new Error("can't submit without fn");
+      }
+      onAdd(value);
+      setOpen(false);
+    },
+    [setOpen, onAdd],
   );
 
-  return {
-    isOpen,
-    canOpen,
-    showChildren,
-    updating,
-    onToggleClick,
-    isAdding,
-    addingVal,
-    onAddNew,
-    onAddComplete,
-  };
+  const addClick = useCallback(() => {
+    setOpen((val) => {
+      if (val === "add") {
+        return false;
+      }
+      return "add";
+    });
+  }, [setOpen]);
+
+  const toggleClick = useCallback(() => {
+    setOpen((val) => {
+      // toggle just switches false and default true, so simple logic
+      return !val;
+    });
+  }, [setOpen]);
+
+  return { open, submitAdd, addClick, toggleClick };
 }

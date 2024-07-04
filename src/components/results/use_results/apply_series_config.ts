@@ -11,7 +11,7 @@ import { keepSmallerRange } from "./utils";
 function getRange(dataRange: RangeType, options: SeriesConfig) {
   const step = options.step ?? 1;
   const range =
-    options.range ? keepSmallerRange(dataRange, options.range) : dataRange;
+    options.range ? keepSmallerRange(dataRange, options.range) : [...dataRange];
   // shift min-max to closest step
   if (step !== 1) {
     // let msg = `shifting range for step(${step}): before - ${range.toString()}`;
@@ -80,6 +80,16 @@ export default function applySeriesConfig(
       }
     }
     dataI += direction;
+  }
+  // if nextVal didn't reach the end of the range
+  if (nextVal <= max && nextVal >= min) {
+    const newItem = { value: nextVal, percentage: toAdd };
+    // use direciton to determine if we add to start or end of array
+    if (direction > 0) {
+      values.push(newItem);
+    } else {
+      values.unshift(newItem);
+    }
   }
 
   return {

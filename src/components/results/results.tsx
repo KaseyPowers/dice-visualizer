@@ -8,7 +8,7 @@ import { useTheme } from "@mui/material/styles";
 import useMediaQuery from "@mui/material/useMediaQuery";
 
 import useResults, { type UseDataInputs } from "./use_results";
-import SeriesControls from "./controls/series_controls";
+import SeriesControls from "./controls/full_data_controls";
 
 export type InputItemProps = UseDataInputs;
 

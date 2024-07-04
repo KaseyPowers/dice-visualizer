@@ -30,27 +30,6 @@ export default function SeriesItemTitle({
   onAdd,
   onRemove,
 }: SeriesItemTitleProps) {
-  const mainContent = (
-    <>
-      {icon && (
-        <ListItemIcon
-          {...(typeof iconWidth !== "undefined" ?
-            { sx: { minWidth: iconWidth } }
-          : undefined)}
-        >
-          {icon}
-        </ListItemIcon>
-      )}
-      {color && (
-        <ColorCircle
-          marginLeft={icon ? 1 : 0}
-          {...(typeof color === "string" ? { color } : { colors: color })}
-        />
-      )}
-      {label && <ListItemText primary={label} />}
-    </>
-  );
-
   const mainSx: SxProps = {
     flex: "1 1 0%",
   };
@@ -68,7 +47,22 @@ export default function SeriesItemTitle({
       paddingRight={3}
     >
       <ListItemButton onClick={onClick} disabled={!onClick} sx={mainSx}>
-        {mainContent}
+        {icon && (
+          <ListItemIcon
+            {...(typeof iconWidth !== "undefined" ?
+              { sx: { minWidth: iconWidth } }
+            : undefined)}
+          >
+            {icon}
+          </ListItemIcon>
+        )}
+        {color && (
+          <ColorCircle
+            marginLeft={icon ? 1 : 0}
+            {...(typeof color === "string" ? { color } : { colors: color })}
+          />
+        )}
+        {label && <ListItemText primary={label} />}
       </ListItemButton>
 
       {onAdd && (
