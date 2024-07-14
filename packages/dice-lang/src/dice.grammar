@@ -1,0 +1,80 @@
+@top Program { expression* }
+
+
+
+@precedence {
+  times @left,
+  add @left
+}
+
+// statement[@isGroup=Statement] {
+//   IfStatement
+// }
+
+// IfStatement {
+//   kw<"if"> ParenthesizedExpression statement (!else kw<"else"> statement)?
+// }
+
+
+@skip {} {
+  String[isolate] {
+    stringEnd stringContent* stringEnd
+  }
+  Dice {
+    diceShorthand expression
+  }
+}
+
+
+expression[@isGroup=Expression] {
+  Identifier |
+  String | 
+  logicExpression
+}
+
+logicExpression {
+  Digit | 
+  Dice |
+  ArrayExpression |
+  ParenthesizedExpression | 
+  ArithmeticExpression
+}
+
+ArithmeticExpression {
+  expression !times ("*" | divide | "%") expression |
+  expression !add ("+" | "-") expression
+}
+
+commaSep<content> { "" | content ("," content)* }
+
+Range { Digit ".." Digit }
+
+ArrayExpression {
+  "[" commaSep<Digit | Range> "]"
+}
+ParenthesizedExpression { "(" expression ")"}
+
+@skip { space | LineComment }
+
+@tokens {
+
+  Digit { @digit+ }
+
+  diceShorthand { "d" }
+  Identifier { $[a-ce-zA-Z_]  $[a-zA-Z0-9_\-]* }
+  // @precedence{Identifier, diceShorthand}
+
+  // Boolean { "true" | "false" }
+  divide {"/"}
+  LineComment[isolate] { "//" ![\n]* }
+  @precedence{LineComment, divide}
+
+  space { @whitespace+ }
+
+  stringEnd { '"' }
+  stringContent { !["\n] | "\\\"" } 
+
+  // "(" ")"
+}
+
+@detectDelim
