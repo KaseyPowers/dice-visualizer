@@ -1,19 +1,12 @@
-@top Program { expression* }
+@top Program { statement* }
 
-
+@top Expressions { simpleExpression | SimpleExpression { simpleExpression? ";" }+ }
 
 @precedence {
+  prefix,
   times @left,
   add @left
 }
-
-// statement[@isGroup=Statement] {
-//   IfStatement
-// }
-
-// IfStatement {
-//   kw<"if"> ParenthesizedExpression statement (!else kw<"else"> statement)?
-// }
 
 
 @skip {} {
@@ -23,40 +16,60 @@
   Dice {
     diceShorthand expression
   }
+  prefixExpression {
+    !prefix (
+      plusMin
+    ) expression
+  }
 }
 
+statement[@isGroup=Statement] {
+  String
+}
+
+outputConfig {
+  String
+}
+
+simpleExpression { expression outputConfig?}
 
 expression[@isGroup=Expression] {
   Identifier |
-  String | 
-  logicExpression
-}
-
-logicExpression {
   Digit | 
   Dice |
-  ArrayExpression |
-  ParenthesizedExpression | 
-  ArithmeticExpression
-}
-
-ArithmeticExpression {
-  expression !times ("*" | divide | "%") expression |
-  expression !add ("+" | "-") expression
+  Array |  
+  ParenthesisExpression | 
+  UnaryExpression |
+  BinaryExpression
 }
 
 commaSep<content> { "" | content ("," content)* }
 
 Range { Digit ".." Digit }
 
-ArrayExpression {
+Array {
   "[" commaSep<Digit | Range> "]"
 }
-ParenthesizedExpression { "(" expression ")"}
+ParenthesisExpression { "(" expression ")"}
+
+UnaryExpression {
+  prefixExpression
+}
+// unarySpaced
+
+BinaryExpression {
+  expression !times (divide | ArithOp<"%"> | ArithOp<"*">) expression |
+  expression !add plusMin expression
+}
+
 
 @skip { space | LineComment }
 
+plusMin { ArithOp<"+" | "-">}
+
 @tokens {
+
+  ArithOp<expr> {expr}
 
   Digit { @digit+ }
 
@@ -65,7 +78,7 @@ ParenthesizedExpression { "(" expression ")"}
   // @precedence{Identifier, diceShorthand}
 
   // Boolean { "true" | "false" }
-  divide {"/"}
+  divide[@name=ArithOp] {"/"}
   LineComment[isolate] { "//" ![\n]* }
   @precedence{LineComment, divide}
 

@@ -9,7 +9,7 @@ import {
 } from "@codemirror/language";
 import { styleTags, tags as t } from "@lezer/highlight";
 
-export const EXAMPLELanguage = LRLanguage.define({
+export const DiceLanguage = LRLanguage.define({
   parser: parser.configure({
     props: [
       indentNodeProp.add({
@@ -32,6 +32,6 @@ export const EXAMPLELanguage = LRLanguage.define({
   },
 });
 
-export function EXAMPLE() {
-  return new LanguageSupport(EXAMPLELanguage);
+export function Dice() {
+  return new LanguageSupport(DiceLanguage);
 }

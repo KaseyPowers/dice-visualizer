@@ -1,0 +1,13 @@
+
+# Strings
+
+"hello"
+"one\"\\two"
+" a longer string "
+"two line
+string?"
+"split
+
+==>
+
+Program(String, String, String, String, String(⚠))

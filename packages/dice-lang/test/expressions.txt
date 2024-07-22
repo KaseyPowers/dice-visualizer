@@ -1,0 +1,157 @@
+# Single Expression {"top": "Expressions"}
+
+123 "test"
+==>
+Expressions(Digit, String)
+
+# Digit {"top": "Expressions"}
+
+123;
+1234567890;
+
+==>
+
+Expressions(SimpleExpression(Digit), SimpleExpression(Digit))
+
+# Identifiers {"top": "Expressions"}
+
+one;
+Two_Three;
+
+==>
+
+Expressions(SimpleExpression(Identifier), SimpleExpression(Identifier))
+
+# Arrays {"top": "Expressions"}
+
+[1,2];
+[1..5,10];
+
+==>
+
+Expressions(
+  SimpleExpression(Array(Digit, Digit)),
+  SimpleExpression(Array(Range(Digit, Digit), Digit)),
+)
+
+# Dice {"top": "Expressions"}
+
+d10;
+d 10;
+d[1,2];
+d(1 + 5);
+
+==>
+
+Expressions(
+  SimpleExpression(Dice(Digit)),
+  SimpleExpression(Dice(⚠, Digit)),
+  SimpleExpression(Dice(Array(Digit, Digit))),
+  SimpleExpression(Dice(ParenthesisExpression(BinaryExpression(Digit,ArithOp, Digit))))
+)
+
+# UnaryExpressions {"top": "Expressions"}
+
+1234567890;
++012;
+-234;
+-Test;
+
+==>
+
+Expressions(
+    SimpleExpression(Digit), 
+    SimpleExpression(UnaryExpression(ArithOp, Digit)), 
+    SimpleExpression(UnaryExpression(ArithOp, Digit)), 
+    SimpleExpression(UnaryExpression(ArithOp, Identifier))
+)
+
+# Arithmetic (basic) {"top": "Expressions"}
+
+1 + 1;
+5 - 1;
+2 * 3;
+4 / 4;
+4 % 3;
+
+==> 
+
+Expressions(
+  SimpleExpression(BinaryExpression(Digit,ArithOp, Digit)),
+  SimpleExpression(BinaryExpression(Digit,ArithOp, Digit)),
+  SimpleExpression(BinaryExpression(Digit,ArithOp, Digit)),
+  SimpleExpression(BinaryExpression(Digit,ArithOp, Digit)),
+  SimpleExpression(BinaryExpression(Digit,ArithOp, Digit)),
+)
+
+# Arithmetic (With Unary) {"top": "Expressions"}
+
+-8 * 2;
++2 - 5;
+-4 / 2;
+
+==> 
+
+Expressions(
+  SimpleExpression(BinaryExpression(
+    UnaryExpression(ArithOp, Digit),
+    ArithOp, 
+    Digit
+  )),
+  SimpleExpression(BinaryExpression(
+    UnaryExpression(ArithOp, Digit),
+    ArithOp, 
+    Digit
+  )),
+  SimpleExpression(BinaryExpression(
+    UnaryExpression(ArithOp, Digit),
+    ArithOp, 
+    Digit
+  ))
+)
+
+# Arithmetic (mixed) {"top": "Expressions"}
+
+1 + 2 * 3;
+1 * -2 + 4;
+1 * 4 - 5/2 + 3;
+
+==> 
+
+Expressions(
+  SimpleExpression(BinaryExpression(Digit, ArithOp, BinaryExpression(Digit, ArithOp, Digit))),
+  SimpleExpression(BinaryExpression(BinaryExpression(Digit, ArithOp, UnaryExpression(ArithOp, Digit)), ArithOp, Digit)),
+  SimpleExpression(
+    BinaryExpression(
+        BinaryExpression(
+        BinaryExpression(Digit, ArithOp, Digit),
+        ArithOp,
+        BinaryExpression(Digit, ArithOp, Digit)
+        ), 
+        ArithOp,
+        Digit
+    )
+  )
+)
+
+
+# Strings {"top": "Expressions"}
+
+test "hello";
+1 "one\"\\two";
+d10 " a longer string ";
+1 "test
+;
+[1]"two line
+string?";
+
+
+==>
+
+Expressions(
+    SimpleExpression(Identifier, String),
+    SimpleExpression(Digit, String),
+    SimpleExpression(Dice(Digit), String), 
+    SimpleExpression(Digit, String(⚠)),
+    SimpleExpression(Array(Digit), String(⚠)),    
+)
